@@ -16,7 +16,12 @@ export function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <Button variant="outline" size="icon" disabled>
+            <Button
+                variant="outline"
+                size="icon"
+                className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
+                disabled
+            >
                 <Sun className="h-4 w-4" />
             </Button>
         );
@@ -28,6 +33,7 @@ export function ThemeToggle() {
         <Button
             variant="outline"
             size="icon"
+            className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
             onClick={() => setTheme(isDark ? "light" : "dark")}
             aria-label="Toggle theme"
         >

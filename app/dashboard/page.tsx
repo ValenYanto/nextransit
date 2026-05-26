@@ -1,112 +1,195 @@
-import { AlertTriangle, Bus, Clock3, UsersRound } from "lucide-react";
+import {
+    AlertTriangle,
+    Bus,
+    Clock3,
+    MapPinned,
+    Route,
+    UsersRound,
+} from "lucide-react";
 
+import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
+import { MetricCard } from "@/components/shared/metric-card";
+import { PageHeading } from "@/components/shared/page-heading";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { getDensityRecommendation } from "@/lib/prediction/crowd";
 
-const stats = [
-    {
-        title: "Active Fleet",
-        value: "42",
-        desc: "+6 from last hour",
-        icon: Bus,
-    },
-    {
-        title: "Avg ETA Accuracy",
-        value: "91%",
-        desc: "Prediction confidence",
-        icon: Clock3,
-    },
-    {
-        title: "Crowded Stops",
-        value: "8",
-        desc: "Need monitoring",
-        icon: UsersRound,
-    },
-    {
-        title: "Delayed Routes",
-        value: "5",
-        desc: "Require action",
-        icon: AlertTriangle,
-    },
-];
+export default async function DashboardPage() {
+    const [
+        totalVehicles,
+        activeVehicles,
+        delayedVehicles,
+        totalRoutes,
+        totalStops,
+        crowdedPredictions,
+        latestPredictions,
+        latestTaps,
+    ] = await Promise.all([
+        prisma.vehicle.count(),
+        prisma.vehicle.count({
+            where: {
+                status: "ACTIVE",
+            },
+        }),
+        prisma.vehicle.count({
+            where: {
+                status: "DELAYED",
+            },
+        }),
+        prisma.route.count(),
+        prisma.stop.count(),
+        prisma.crowdPrediction.count({
+            where: {
+                densityLevel: {
+                    in: ["HIGH", "CRITICAL"],
+                },
+            },
+        }),
+        prisma.crowdPrediction.findMany({
+            take: 4,
+            orderBy: {
+                createdAt: "desc",
+            },
+            include: {
+                stop: true,
+            },
+        }),
+        prisma.passengerTap.findMany({
+            take: 5,
+            orderBy: {
+                timestamp: "desc",
+            },
+            include: {
+                stop: true,
+            },
+        }),
+    ]);
 
-export default function DashboardPage() {
+    const totalPassengerMovement = latestTaps.reduce(
+        (total, tap) => total + tap.countIn + tap.countOut,
+        0,
+    );
+
     return (
         <div>
-            <div className="mb-6">
-                <p className="font-semibold text-cyan-600 dark:text-cyan-300">
-                    Overview
-                </p>
-                <h2 className="mt-1 text-3xl font-black tracking-tight">
-                    Real-time transit intelligence
-                </h2>
+            <PageHeading
+                label="Overview"
+                title="Transit intelligence overview"
+                description="Pantau performa armada, kepadatan halte, dan rekomendasi AI dalam satu dashboard operasional."
+            />
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <MetricCard
+                    title="Total Fleet"
+                    value={totalVehicles}
+                    description={`${activeVehicles} active fleet`}
+                    icon={Bus}
+                />
+                <MetricCard
+                    title="Delayed Fleet"
+                    value={delayedVehicles}
+                    description="Fleet requiring attention"
+                    icon={AlertTriangle}
+                />
+                <MetricCard
+                    title="Routes"
+                    value={totalRoutes}
+                    description={`${totalStops} stops registered`}
+                    icon={Route}
+                />
+                <MetricCard
+                    title="Crowded Stops"
+                    value={crowdedPredictions}
+                    description="High or critical density"
+                    icon={UsersRound}
+                />
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                {stats.map((stat) => (
-                    <Card
-                        key={stat.title}
-                        className="rounded-3xl dark:border-white/10 dark:bg-white/5"
-                    >
-                        <CardContent className="p-6">
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                                        {stat.title}
-                                    </p>
-                                    <p className="mt-2 text-4xl font-black">{stat.value}</p>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        {stat.desc}
-                                    </p>
-                                </div>
-                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300">
-                                    <stat.icon className="h-6 w-6" />
-                                </div>
+            <div className="mt-6 grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                    <CardContent className="p-5">
+                        <div className="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
+                                    AI operational recommendations
+                                </h2>
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    Generated from latest crowd prediction data.
+                                </p>
                             </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+                            <Clock3 className="h-5 w-5 text-slate-400" />
+                        </div>
 
-            <div className="mt-6 grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-                <Card className="rounded-3xl dark:border-white/10 dark:bg-white/5">
-                    <CardContent className="p-6">
-                        <h3 className="text-xl font-bold">AI Recommendations</h3>
                         <div className="mt-5 space-y-3">
-                            {[
-                                "Redirect 2 feeder buses to Fatmawati Station in the next 20 minutes.",
-                                "Increase frequency on Route B12 during 17:00–18:30 rush hour.",
-                                "Platform density at Dukuh Atas is predicted to reach HIGH level.",
-                            ].map((item) => (
-                                <div
-                                    key={item}
-                                    className="rounded-2xl border border-slate-200 bg-white p-4 text-sm dark:border-white/10 dark:bg-slate-950"
-                                >
-                                    {item}
-                                </div>
-                            ))}
+                            {latestPredictions.length > 0 ? (
+                                latestPredictions.map((prediction) => (
+                                    <div
+                                        key={prediction.id}
+                                        className="rounded-xl border border-slate-200 p-4 dark:border-white/10"
+                                    >
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div>
+                                                <p className="font-medium text-slate-950 dark:text-white">
+                                                    {prediction.stop.name}
+                                                </p>
+                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                    {getDensityRecommendation(prediction.densityLevel)}
+                                                </p>
+                                            </div>
+
+                                            <StatusBadge status={prediction.densityLevel} />
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    No prediction data available yet.
+                                </p>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-3xl dark:border-white/10 dark:bg-white/5">
-                    <CardContent className="p-6">
-                        <h3 className="text-xl font-bold">Today Summary</h3>
-                        <div className="mt-5 space-y-4">
+                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                    <CardContent className="p-5">
+                        <div className="flex items-start justify-between">
                             <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Total passengers simulated
+                                <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
+                                    Passenger movement
+                                </h2>
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    Latest tap-in and tap-out activity.
                                 </p>
-                                <p className="text-3xl font-black">12,480</p>
                             </div>
-                            <div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    Average waiting time
-                                </p>
-                                <p className="text-3xl font-black">7.2 min</p>
-                            </div>
-                            <div className="rounded-2xl bg-emerald-100 p-4 text-sm font-semibold text-emerald-700 dark:bg-emerald-400/10 dark:text-emerald-300">
-                                System estimates 18% waiting time reduction after optimization.
-                            </div>
+                            <MapPinned className="h-5 w-5 text-slate-400" />
+                        </div>
+
+                        <div className="mt-6">
+                            <p className="font-[var(--font-jakarta)] text-4xl font-semibold tracking-tight">
+                                {totalPassengerMovement}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                recent passenger movements
+                            </p>
+                        </div>
+
+                        <div className="mt-5 space-y-3">
+                            {latestTaps.map((tap) => (
+                                <div
+                                    key={tap.id}
+                                    className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/5"
+                                >
+                                    <div>
+                                        <p className="text-sm font-medium">{tap.stop.name}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            In {tap.countIn} · Out {tap.countOut}
+                                        </p>
+                                    </div>
+                                    <p className="text-sm font-semibold">
+                                        {tap.countIn + tap.countOut}
+                                    </p>
+                                </div>
+                            ))}
                         </div>
                     </CardContent>
                 </Card>
