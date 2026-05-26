@@ -1,14 +1,62 @@
-export default function SimulatorPage() {
+import { Activity, Bus, Clock3, UsersRound } from "lucide-react";
+
+import { prisma } from "@/lib/prisma";
+import { MetricCard } from "@/components/shared/metric-card";
+import { PageHeading } from "@/components/shared/page-heading";
+import { SimulatorPanel } from "@/components/simulator/simulator-panel";
+
+export default async function SimulatorPage() {
+    const [vehicles, routes, taps] = await Promise.all([
+        prisma.vehicle.count(),
+        prisma.route.count(),
+        prisma.passengerTap.findMany({
+            take: 10,
+            orderBy: { timestamp: "desc" },
+        }),
+    ]);
+
+    const passengerMovement = taps.reduce(
+        (sum, tap) => sum + tap.countIn + tap.countOut,
+        0,
+    );
+
     return (
         <div>
-            <p className="font-semibold text-cyan-600 dark:text-cyan-300">
-                Simulator
-            </p>
-            <h2 className="mt-1 text-3xl font-black tracking-tight">
-                Rush hour simulation
-            </h2>
-            <div className="mt-6 rounded-3xl border border-dashed border-slate-300 p-10 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                Rush hour, rain, and event simulation will be built in Phase 4.
+            <PageHeading
+                label="Simulator"
+                title="Operational scenario simulator"
+                description="Simulasikan kondisi jam sibuk, hujan, atau event besar untuk melihat dampaknya terhadap ETA, kepadatan, dan kebutuhan armada."
+            />
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <MetricCard
+                    title="Fleet Baseline"
+                    value={vehicles}
+                    description="Registered fleet"
+                    icon={Bus}
+                />
+                <MetricCard
+                    title="Route Baseline"
+                    value={routes}
+                    description="Available routes"
+                    icon={Activity}
+                />
+                <MetricCard
+                    title="Passenger Baseline"
+                    value={passengerMovement}
+                    description="Recent movement sample"
+                    icon={UsersRound}
+                />
+                <MetricCard
+                    title="Scenario Types"
+                    value={4}
+                    description="Normal, rush hour, rain, event"
+                    icon={Clock3}
+                />
+            </div>
+
+            <div className="mt-6">
+                <SimulatorPanel />
             </div>
         </div>
     );

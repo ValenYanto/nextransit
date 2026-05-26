@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
-import { SessionProvider } from "@/components/providers/session-provider";
+import "leaflet/dist/leaflet.css";
+
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { SessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -24,9 +26,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="id" suppressHydrationWarning>
       <body
