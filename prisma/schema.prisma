@@ -1,0 +1,186 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  OPERATOR
+  ADMIN
+}
+
+enum VehicleStatus {
+  ACTIVE
+  DELAYED
+  CROWDED
+  MAINTENANCE
+  OFFLINE
+}
+
+enum RouteType {
+  FEEDER
+  BUS
+  MRT
+  LRT
+}
+
+enum StopType {
+  BUS_STOP
+  STATION
+  TERMINAL
+}
+
+enum DensityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Route {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  type        RouteType
+  origin      String
+  destination String
+  distanceKm  Float    @default(0)
+  isActive    Boolean   @default(true)
+
+  vehicles    Vehicle[]
+  schedules   Schedule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Stop {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  type      StopType
+  latitude  Float
+  longitude Float
+  area      String?
+  isActive  Boolean  @default(true)
+
+  schedules        Schedule[]
+  passengerTaps    PassengerTap[]
+  etaPredictions   EtaPrediction[]
+  crowdPredictions CrowdPrediction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vehicle {
+  id          String        @id @default(cuid())
+  code        String        @unique
+  plateNumber String?
+  type        RouteType
+  capacity    Int           @default(40)
+  status      VehicleStatus @default(ACTIVE)
+
+  currentRouteId String?
+  currentRoute   Route? @relation(fields: [currentRouteId], references: [id])
+
+  positions      VehiclePosition[]
+  etaPredictions EtaPrediction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VehiclePosition {
+  id         String   @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  latitude   Float
+  longitude  Float
+  speedKmh   Float    @default(0)
+  heading    Float?
+  recordedAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+model Schedule {
+  id      String @id @default(cuid())
+
+  routeId String
+  route   Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  stopId String
+  stop   Stop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  arrivalTime   String
+  departureTime String
+  sequence      Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PassengerTap {
+  id     String @id @default(cuid())
+
+  stopId String
+  stop   Stop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  countIn   Int      @default(0)
+  countOut  Int      @default(0)
+  timestamp DateTime @default(now())
+
+  createdAt DateTime @default(now())
+}
+
+model EtaPrediction {
+  id String @id @default(cuid())
+
+  vehicleId String
+  vehicle   Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  stopId String
+  stop   Stop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  predictedMinutes Int
+  confidence       Float @default(0.8)
+  trafficLevel     String?
+  reason           String?
+
+  createdAt DateTime @default(now())
+}
+
+model CrowdPrediction {
+  id String @id @default(cuid())
+
+  stopId String
+  stop   Stop   @relation(fields: [stopId], references: [id], onDelete: Cascade)
+
+  densityLevel   DensityLevel
+  predictedCount Int
+  confidence     Float @default(0.8)
+  reason         String?
+
+  createdAt DateTime @default(now())
+}
