@@ -177,6 +177,20 @@ async function main() {
                 recordedAt: new Date(),
             },
         });
+
+        await prisma.vehicleOccupancy.create({
+            data: {
+                vehicleId: createdVehicle.id,
+                passengerCount:
+                    createdVehicle.type === "MRT"
+                        ? 420
+                        : createdVehicle.status === "DELAYED"
+                            ? 29
+                            : 18,
+                capacity: createdVehicle.capacity,
+                recordedAt: new Date(),
+            },
+        });
     }
 
     const schedules = [

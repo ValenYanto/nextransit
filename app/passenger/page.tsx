@@ -1,30 +1,15 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import { RoutePlanner } from "@/components/passenger/route-planner";
+import { PassengerLiveClient } from "@/components/passenger/passenger-live-client";
 
-export default async function PassengerPage() {
-    const stops = await prisma.stop.findMany({
-        where: {
-            isActive: true,
-        },
-        orderBy: {
-            name: "asc",
-        },
-        select: {
-            id: true,
-            name: true,
-            code: true,
-        },
-    });
-
+export default function PassengerPage() {
     return (
         <main className="min-h-screen bg-slate-50 dark:bg-slate-950">
-            <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+            <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
                 <Logo />
 
                 <div className="flex items-center gap-2">
@@ -42,23 +27,22 @@ export default async function PassengerPage() {
                 </div>
             </header>
 
-            <section className="mx-auto max-w-6xl px-6 py-10">
-                <div className="max-w-3xl">
+            <section className="mx-auto max-w-7xl px-6 py-8">
+                <div className="mb-8 max-w-3xl">
                     <p className="text-sm font-medium text-cyan-600 dark:text-cyan-300">
-                        Passenger App
+                        NexTransit Live
                     </p>
                     <h1 className="mt-2 font-[var(--font-jakarta)] text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Plan your intermodal trip.
+                        Track nearby buses and intermodal connections.
                     </h1>
                     <p className="mt-4 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                        Pilih origin dan destination untuk mendapatkan rekomendasi perjalanan
-                        berdasarkan ETA, traffic, crowd density, dan koneksi feeder–MRT/LRT.
+                        Lihat armada terdekat, estimasi kedatangan, jumlah penumpang di
+                        dalam kendaraan, tingkat kepadatan, serta rute yang paling
+                        direkomendasikan.
                     </p>
                 </div>
 
-                <div className="mt-8">
-                    <RoutePlanner stops={stops} />
-                </div>
+                <PassengerLiveClient />
             </section>
         </main>
     );
