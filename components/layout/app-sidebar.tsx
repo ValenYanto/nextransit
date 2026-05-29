@@ -2,10 +2,16 @@ import Link from "next/link";
 import {
     BarChart3,
     Bus,
+    CalendarClock,
+    ClipboardCheck,
     Gauge,
+    GitMerge,
     Map,
+    MapPin,
     Route,
+    Shapes,
     Sparkles,
+    Waypoints,
 } from "lucide-react";
 
 import { Logo } from "@/components/shared/logo";
@@ -13,10 +19,16 @@ import { Logo } from "@/components/shared/logo";
 const navItems = [
     { title: "Overview", href: "/dashboard", icon: Gauge },
     { title: "Live Map", href: "/dashboard/live-map", icon: Map },
-    { title: "Fleet", href: "/dashboard/fleet", icon: Bus },
+    { title: "Modes", href: "/dashboard/modes", icon: Shapes },
     { title: "Routes", href: "/dashboard/routes", icon: Route },
+    { title: "Stops", href: "/dashboard/stops", icon: MapPin },
+    { title: "Fleet", href: "/dashboard/fleet", icon: Bus },
+    { title: "Schedules", href: "/dashboard/schedules", icon: CalendarClock },
+    { title: "Path Builder", href: "/dashboard/path-builder", icon: Waypoints },
+    { title: "Interchanges", href: "/dashboard/interchanges", icon: GitMerge },
     { title: "Predictions", href: "/dashboard/predictions", icon: BarChart3 },
     { title: "Simulator", href: "/dashboard/simulator", icon: Sparkles },
+    { title: "Case Alignment", href: "/dashboard/case-alignment", icon: ClipboardCheck },
 ];
 
 export function AppSidebar() {

@@ -14,6 +14,8 @@ import { PageHeading } from "@/components/shared/page-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { getDensityRecommendation } from "@/lib/prediction/crowd";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
     const [
         totalVehicles,

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Bell, Search } from "lucide-react";
 import { getServerSession } from "next-auth";
 

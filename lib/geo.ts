@@ -3,6 +3,10 @@ export type Coordinate = {
     longitude: number;
 };
 
+export type LocatedItem = Coordinate & {
+    id: string;
+};
+
 export function getDistanceKm(from: Coordinate, to: Coordinate) {
     const earthRadiusKm = 6371;
 
@@ -23,4 +27,51 @@ export function getDistanceKm(from: Coordinate, to: Coordinate) {
 
 export function toRadians(value: number) {
     return (value * Math.PI) / 180;
+}
+
+export function findNearestStop<T extends LocatedItem>(
+    location: Coordinate,
+    stops: T[],
+) {
+    return findNearest(location, stops);
+}
+
+export function findNearestVehicle<T extends LocatedItem>(
+    location: Coordinate,
+    vehicles: T[],
+) {
+    return findNearest(location, vehicles);
+}
+
+export function interpolatePositionTowardsTarget(
+    from: Coordinate,
+    to: Coordinate,
+    factor = 0.12,
+): Coordinate {
+    const clampedFactor = Math.min(Math.max(factor, 0), 1);
+
+    return {
+        latitude: from.latitude + (to.latitude - from.latitude) * clampedFactor,
+        longitude: from.longitude + (to.longitude - from.longitude) * clampedFactor,
+    };
+}
+
+function findNearest<T extends LocatedItem>(location: Coordinate, items: T[]) {
+    if (items.length === 0) return null;
+
+    return items.reduce<{
+        item: T;
+        distanceKm: number;
+    } | null>((nearest, item) => {
+        const distanceKm = getDistanceKm(location, item);
+
+        if (!nearest || distanceKm < nearest.distanceKm) {
+            return {
+                item,
+                distanceKm,
+            };
+        }
+
+        return nearest;
+    }, null);
 }

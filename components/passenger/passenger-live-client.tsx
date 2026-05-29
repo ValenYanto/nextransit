@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
     Bus,
     Clock3,
     Loader2,
-    MapPin,
     Navigation,
     RefreshCw,
     UsersRound,
@@ -65,7 +64,7 @@ export function PassengerLiveClient() {
     );
     const [isLoading, setIsLoading] = useState(true);
 
-    async function loadLiveTransit() {
+    const loadLiveTransit = useCallback(async () => {
         setIsLoading(true);
 
         try {
@@ -81,25 +80,28 @@ export function PassengerLiveClient() {
 
             setData(json);
 
-            if (!selectedVehicleId && json.nearestVehicle) {
-                setSelectedVehicleId(json.nearestVehicle.id);
-            }
+            setSelectedVehicleId((current) => current ?? json.nearestVehicle?.id ?? null);
         } catch (error) {
             console.error(error);
         } finally {
             setIsLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => {
-        loadLiveTransit();
+        const timeout = window.setTimeout(() => {
+            loadLiveTransit();
+        }, 0);
 
         const interval = window.setInterval(() => {
             loadLiveTransit();
         }, 15000);
 
-        return () => window.clearInterval(interval);
-    }, []);
+        return () => {
+            window.clearTimeout(timeout);
+            window.clearInterval(interval);
+        };
+    }, [loadLiveTransit]);
 
     const selectedVehicle = useMemo(() => {
         if (!data) return null;

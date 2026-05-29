@@ -15,6 +15,8 @@ import {
     getDensityRecommendation,
 } from "@/lib/prediction/crowd";
 
+export const dynamic = "force-dynamic";
+
 export default async function PredictionsPage() {
     const [predictions, vehicles, routes] = await Promise.all([
         prisma.crowdPrediction.findMany({

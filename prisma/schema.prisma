@@ -56,6 +56,21 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model TransportMode {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  color       String?
+  icon        String?
+  isActive    Boolean @default(true)
+
+  routes Route[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Route {
   id          String    @id @default(cuid())
   code        String    @unique
@@ -65,12 +80,34 @@ model Route {
   destination String
   distanceKm  Float    @default(0)
   isActive    Boolean   @default(true)
+  pathSource  String?
+  pathUpdatedAt DateTime?
+  pathPointCount Int     @default(0)
+
+  modeId      String?
+  mode        TransportMode? @relation(fields: [modeId], references: [id])
 
   vehicles    Vehicle[]
   schedules   Schedule[]
+  pathPoints  RoutePathPoint[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model RoutePathPoint {
+  id        String @id @default(cuid())
+
+  routeId String
+  route   Route  @relation(fields: [routeId], references: [id], onDelete: Cascade)
+
+  latitude  Float
+  longitude Float
+  sequence  Int
+
+  createdAt DateTime @default(now())
+
+  @@unique([routeId, sequence])
 }
 
 model Stop {
@@ -99,6 +136,7 @@ model Vehicle {
   type        RouteType
   capacity    Int           @default(40)
   status      VehicleStatus @default(ACTIVE)
+  direction   String        @default("OUTBOUND")
 
   currentRouteId String?
   currentRoute   Route? @relation(fields: [currentRouteId], references: [id])
@@ -140,6 +178,8 @@ model Schedule {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([routeId, sequence])
 }
 
 model PassengerTap {

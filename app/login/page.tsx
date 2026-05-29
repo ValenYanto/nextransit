@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Logo } from "@/components/shared/logo";
@@ -31,7 +32,13 @@ export default function LoginPage() {
                         </p>
                     </div>
 
-                    <LoginForm />
+                    <Suspense
+                        fallback={
+                            <div className="mt-8 h-44 rounded-2xl bg-slate-100 dark:bg-white/5" />
+                        }
+                    >
+                        <LoginForm />
+                    </Suspense>
 
                     <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
                         Belum punya akun?{" "}

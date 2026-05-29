@@ -7,6 +7,8 @@ import { PageHeading } from "@/components/shared/page-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { LiveFleetMapWrapper } from "@/components/map/live-fleet-map-wrapper";
 
+export const dynamic = "force-dynamic";
+
 export default async function LiveMapPage() {
     const vehicles = await prisma.vehicle.findMany({
         orderBy: { code: "asc" },

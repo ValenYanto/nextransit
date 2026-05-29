@@ -5,6 +5,8 @@ import { MetricCard } from "@/components/shared/metric-card";
 import { PageHeading } from "@/components/shared/page-heading";
 import { SimulatorPanel } from "@/components/simulator/simulator-panel";
 
+export const dynamic = "force-dynamic";
+
 export default async function SimulatorPage() {
     const [vehicles, routes, taps] = await Promise.all([
         prisma.vehicle.count(),
