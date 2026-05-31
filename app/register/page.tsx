@@ -1,48 +1,47 @@
 import Link from "next/link";
+import { BusFront } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Logo } from "@/components/shared/logo";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { RegisterForm } from "@/components/auth/register-form";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 export default function RegisterPage() {
-    return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 p-6 dark:bg-slate-950">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(6,182,212,0.22),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.18),transparent_32%)]" />
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#FFFFFC] p-4 text-[#001011] dark:bg-[#001011] dark:text-[#FFFFFC]">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
 
-            <div className="absolute right-6 top-6">
-                <ThemeToggle />
-            </div>
+      <section className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-[#6CCFF6] text-[#001011]">
+            <BusFront className="h-7 w-7" />
+          </div>
+          <h1 className="mt-4 text-3xl font-bold">NexTransit</h1>
+          <p className="mt-2 text-sm text-[#757780]">Your city. Your route. Live.</p>
+        </div>
 
-            <Card className="relative w-full max-w-md rounded-[2rem] border-slate-200/80 bg-white/90 shadow-2xl shadow-cyan-500/10 backdrop-blur dark:border-white/10 dark:bg-white/5">
-                <CardContent className="p-8">
-                    <Logo />
+        <div className="rounded-3xl border border-black/10 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-[#0a1a1c]">
+          <h2 className="text-2xl font-bold">Create your account</h2>
+          <p className="mt-2 text-sm text-[#757780]">
+            Start tracking routes and planning easier trips.
+          </p>
 
-                    <div className="mt-10">
-                        <p className="font-semibold text-cyan-600 dark:text-cyan-300">
-                            Join NexTransit
-                        </p>
-                        <h1 className="mt-2 font-[var(--font-jakarta)] text-4xl font-black tracking-tight">
-                            Create your account
-                        </h1>
-                        <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                            Start using AI-powered transit prediction and intermodal planning.
-                        </p>
-                    </div>
+          <RegisterForm />
 
-                    <RegisterForm />
+          <div className="my-6 flex items-center gap-3 text-xs text-[#757780]">
+            <span className="h-px flex-1 bg-[#757780]/20" />
+            or
+            <span className="h-px flex-1 bg-[#757780]/20" />
+          </div>
 
-                    <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                        Sudah punya akun?{" "}
-                        <Link
-                            href="/login"
-                            className="font-semibold text-cyan-600 hover:underline dark:text-cyan-300"
-                        >
-                            Login
-                        </Link>
-                    </p>
-                </CardContent>
-            </Card>
-        </main>
-    );
+          <p className="text-center text-sm text-[#757780]">
+            Already have an account?{" "}
+            <Link href="/login" className="font-semibold text-[#6CCFF6] hover:underline">
+              Sign in
+            </Link>
+          </p>
+        </div>
+      </section>
+    </main>
+  );
 }

@@ -85,32 +85,32 @@ export default async function SchedulesPage() {
                 <MetricCard title="Available Stops" value={stops.length} description="Active stop registry" icon={MapPin} />
             </div>
 
-            <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="mt-6 rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                         Add or update stop order
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         Reusing a route and sequence updates that slot. Rebuild the route
                         path after changing stop order.
                     </p>
                     <form action={saveSchedule} className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-                        <select name="routeId" required className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900">
+                        <select name="routeId" required className="h-10 rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]">
                             <option value="">Route</option>
                             {routes.map((route) => (
                                 <option key={route.id} value={route.id}>{route.code} · {route.name}</option>
                             ))}
                         </select>
-                        <select name="stopId" required className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900">
+                        <select name="stopId" required className="h-10 rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]">
                             <option value="">Stop</option>
                             {stops.map((stop) => (
                                 <option key={stop.id} value={stop.id}>{stop.name} ({stop.code})</option>
                             ))}
                         </select>
-                        <input name="sequence" required type="number" min="1" placeholder="Sequence" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="arrivalTime" required placeholder="08:00" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="departureTime" required placeholder="08:02" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <Button className="h-10 rounded-xl bg-slate-950 text-white shadow-none dark:bg-white dark:text-slate-950">
+                        <input name="sequence" required type="number" min="1" placeholder="Sequence" className="h-10 rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
+                        <input name="arrivalTime" required placeholder="08:00" className="h-10 rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
+                        <input name="departureTime" required placeholder="08:02" className="h-10 rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
+                        <Button className="h-10 rounded-xl bg-[#6CCFF6] text-[#001011] shadow-none">
                             Save order
                         </Button>
                     </form>
@@ -119,35 +119,35 @@ export default async function SchedulesPage() {
 
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
                 {routes.map((route) => (
-                    <Card key={route.id} className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                    <Card key={route.id} className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                         <CardContent className="p-5">
                             <div className="flex items-start justify-between gap-3">
                                 <div>
                                     <div className="flex flex-wrap items-center gap-2">
                                         <StatusBadge status={route.type} />
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">{route.code}</span>
+                                        <span className="text-xs text-[#757780]">{route.code}</span>
                                     </div>
                                     <h2 className="mt-3 font-[var(--font-jakarta)] text-lg font-semibold">{route.name}</h2>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    <p className="mt-1 text-sm text-[#757780]">
                                         {route.origin} to {route.destination}
                                     </p>
                                 </div>
-                                <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                     {route.schedules.length} stops
                                 </span>
                             </div>
                             <div className="mt-5 space-y-2">
                                 {route.schedules.map((schedule) => (
-                                    <div key={schedule.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-3 py-2 dark:border-white/10">
+                                    <div key={schedule.id} className="flex items-center justify-between gap-3 rounded-xl border border-gray-100 px-3 py-2 dark:border-white/[0.07]">
                                         <div>
                                             <p className="text-sm font-medium">{schedule.sequence}. {schedule.stop.name}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{schedule.stop.type} · {schedule.stop.area ?? "Jakarta"}</p>
+                                            <p className="text-xs text-[#757780]">{schedule.stop.type} · {schedule.stop.area ?? "Jakarta"}</p>
                                         </div>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">{schedule.arrivalTime}</p>
+                                        <p className="text-xs text-[#757780]">{schedule.arrivalTime}</p>
                                     </div>
                                 ))}
                                 {route.schedules.length === 0 ? (
-                                    <p className="rounded-xl border border-slate-200 p-3 text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                    <p className="rounded-xl border border-gray-100 p-3 text-sm text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                         No stop order yet.
                                     </p>
                                 ) : null}

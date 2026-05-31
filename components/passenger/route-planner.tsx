@@ -83,12 +83,12 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
 
     return (
         <div className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
-            <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                         Trip planner
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         Pilih titik awal dan tujuan untuk mendapatkan rekomendasi perjalanan.
                     </p>
 
@@ -106,7 +106,7 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                                         setDestinationStopId(fallback?.id ?? "");
                                     }
                                 }}
-                                className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950"
+                                className="mt-2 h-11 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm outline-none transition focus:border-[#6CCFF6] dark:border-white/[0.07] dark:bg-[#0d1f22]"
                             >
                                 {stops.map((stop) => (
                                     <option key={stop.id} value={stop.id}>
@@ -121,7 +121,7 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                             <select
                                 value={destinationStopId}
                                 onChange={(event) => setDestinationStopId(event.target.value)}
-                                className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-cyan-400 dark:border-white/10 dark:bg-slate-950"
+                                className="mt-2 h-11 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm outline-none transition focus:border-[#6CCFF6] dark:border-white/[0.07] dark:bg-[#0d1f22]"
                             >
                                 {destinationOptions.map((stop) => (
                                     <option key={stop.id} value={stop.id}>
@@ -149,21 +149,21 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                 </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                         Recommended route
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         ETA, crowd, dan koneksi antarmoda akan muncul di sini.
                     </p>
 
                     {result ? (
                         <div className="mt-5">
                             <div className="grid gap-3 md:grid-cols-3">
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <Clock3 className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <Clock3 className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Total Trip
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold">
@@ -171,8 +171,8 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Crowd
                                     </p>
                                     <div className="mt-3">
@@ -180,8 +180,8 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Confidence
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold">
@@ -198,9 +198,9 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                                     return (
                                         <div
                                             key={`${step.mode}-${index}`}
-                                            className="flex gap-4 rounded-xl border border-slate-200 p-4 dark:border-white/10"
+                                            className="flex gap-4 rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]"
                                         >
-                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-slate-300">
+                                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#757780]/10 text-[#757780] dark:bg-white/5 dark:text-[#FFFFFC]">
                                                 <Icon className="h-4 w-4" />
                                             </div>
 
@@ -208,7 +208,7 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                                                 <div className="flex items-start justify-between gap-4">
                                                     <div>
                                                         <p className="font-medium">{step.title}</p>
-                                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                        <p className="mt-1 text-sm text-[#757780]">
                                                             {step.description}
                                                         </p>
                                                     </div>
@@ -220,15 +220,15 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
                                 })}
                             </div>
 
-                            <div className="mt-5 rounded-xl border border-slate-200 p-4 dark:border-white/10">
+                            <div className="mt-5 rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]">
                                 <p className="text-sm font-medium">AI Insight</p>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                <p className="mt-1 text-sm text-[#757780]">
                                     {result.insight}
                                 </p>
                             </div>
                         </div>
                     ) : (
-                        <div className="mt-5 rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+                        <div className="mt-5 rounded-xl border border-dashed border-gray-100 p-8 text-center text-sm text-[#757780] dark:border-white/[0.07] text-[#757780]">
                             Belum ada rekomendasi. Pilih origin dan destination lalu generate.
                         </div>
                     )}

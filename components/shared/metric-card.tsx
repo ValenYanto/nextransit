@@ -16,28 +16,28 @@ export function MetricCard({
     icon: Icon,
 }: MetricCardProps) {
     return (
-        <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-            <CardContent className="p-5">
+        <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
+            <CardContent className="p-6">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mb-1 text-sm font-medium text-[#757780]">
                             {title}
                         </p>
 
-                        <p className="mt-2 font-[var(--font-jakarta)] text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        <p className="text-4xl font-bold leading-none text-[#001011] dark:text-[#FFFFFC]">
                             {value}
                         </p>
 
                         {description ? (
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">
+                            <p className="mt-2 text-xs text-[#757780]">
                                 {description}
                             </p>
                         ) : null}
                     </div>
 
                     {Icon ? (
-                        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 dark:border-white/10 dark:text-slate-400">
-                            <Icon className="h-4 w-4" />
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6CCFF6]/10">
+                            <Icon className="h-5 w-5 text-[#6CCFF6]" />
                         </div>
                     ) : null}
                 </div>

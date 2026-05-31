@@ -128,11 +128,89 @@ export async function GET(
                     lastUpdated: position.recordedAt.toISOString(),
                 };
             })
-            .filter((vehicle) => vehicle !== null);
+            .filter((vehicle): vehicle is NonNullable<typeof vehicle> => vehicle !== null);
         const pathPoints = route.pathPoints.map((point) => ({
             latitude: point.latitude,
             longitude: point.longitude,
             sequence: point.sequence,
+        }));
+        const findNearestStopIndex = (vehicle: (typeof vehicles)[number]) => {
+            if (stops.length === 0) return -1;
+
+            return stops.reduce((bestIndex, stop, index) => {
+                const bestStop = stops[bestIndex];
+                const distance = Math.hypot(
+                    vehicle.position.latitude - stop.latitude,
+                    vehicle.position.longitude - stop.longitude,
+                );
+                const bestDistance = Math.hypot(
+                    vehicle.position.latitude - bestStop.latitude,
+                    vehicle.position.longitude - bestStop.longitude,
+                );
+
+                return distance < bestDistance ? index : bestIndex;
+            }, 0);
+        };
+        const normalizeStopCrowdLevel = (occupancyRate: number) => {
+            if (occupancyRate > 0.85) return "HIGH";
+            if (occupancyRate > 0.6) return "MODERATE";
+            return "LOW";
+        };
+        const routeNameParts = route.name.split(/\s[-–]\s/).map((part) => part.trim()).filter(Boolean);
+        const getTerminalName = (direction: "OUTBOUND" | "INBOUND") => {
+            const scheduledStopName =
+                direction === "OUTBOUND"
+                    ? stops[stops.length - 1]?.name
+                    : stops[0]?.name;
+            const routeTerminalName =
+                direction === "OUTBOUND"
+                    ? route.destination || routeNameParts[1]
+                    : route.origin || routeNameParts[0];
+
+            return scheduledStopName && scheduledStopName.length > 3
+                ? scheduledStopName
+                : routeTerminalName || scheduledStopName || (direction === "OUTBOUND" ? "End terminal" : "Start terminal");
+        };
+        const calculateETAToStop = (vehicle: (typeof vehicles)[number], targetStop: StopPoint) => {
+            const vehicleStopIndex = findNearestStopIndex(vehicle);
+            const targetStopIndex = stops.findIndex((stop) => stop.id === targetStop.id);
+
+            if (vehicleStopIndex === -1 || targetStopIndex === -1) return -1;
+
+            const stopsToPass =
+                vehicle.direction === "INBOUND"
+                    ? vehicleStopIndex - targetStopIndex
+                    : targetStopIndex - vehicleStopIndex;
+
+            if (stopsToPass < 0) return -1;
+            if (stopsToPass === 0) return 0;
+
+            const speed = vehicle.position.speedKmh > 0 ? vehicle.position.speedKmh : 18;
+            const minutesPerStop = Math.max(1, Math.round((20 / speed) * 3));
+            return stopsToPass * minutesPerStop;
+        };
+        const stopETAs = stops.map((stop) => ({
+            stopId: stop.id,
+            stopName: stop.name,
+            vehicles: vehicles
+                .map((vehicle) => {
+                    const etaMinutes = calculateETAToStop(vehicle, stop);
+                    if (etaMinutes === -1) return null;
+
+                    return {
+                        vehicleId: vehicle.id,
+                        vehicleCode: vehicle.code,
+                        direction: vehicle.direction,
+                        etaMinutes,
+                        etaLabel: etaMinutes === 0 ? "Sekarang" : `${etaMinutes} min`,
+                        nextStopName: getTerminalName(vehicle.direction),
+                        occupancy: vehicle.passengerCount,
+                        capacity: vehicle.capacity,
+                        crowdLevel: normalizeStopCrowdLevel(vehicle.occupancyRate),
+                    };
+                })
+                .filter((vehicle): vehicle is NonNullable<typeof vehicle> => vehicle !== null)
+                .sort((a, b) => a.etaMinutes - b.etaMinutes),
         }));
         const geometryValidation = validateRouteGeometry({
             points: pathPoints,
@@ -179,6 +257,7 @@ export async function GET(
             stops,
             pathPoints,
             vehicles,
+            stopETAs,
             generatedAt: new Date().toISOString(),
         });
     } catch (error) {

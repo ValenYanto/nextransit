@@ -114,8 +114,8 @@ export function PassengerLiveClient() {
 
     if (isLoading && !data) {
         return (
-            <div className="flex min-h-[520px] items-center justify-center rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950">
-                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex min-h-[520px] items-center justify-center rounded-2xl border border-gray-100 bg-white dark:border-white/[0.07] dark:bg-[#0d1f22]">
+                <div className="flex items-center gap-2 text-sm text-[#757780]">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Loading nearest transit...
                 </div>
@@ -139,13 +139,13 @@ export function PassengerLiveClient() {
                     userLocation={data.userLocation}
                 />
 
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                     <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p className="text-sm font-medium text-slate-950 dark:text-white">
                                 Live tracking
                             </p>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            <p className="mt-1 text-xs text-[#757780]">
                                 Auto-refresh every 15 seconds · Last update{" "}
                                 {new Date(data.generatedAt).toLocaleTimeString("id-ID")}
                             </p>
@@ -155,7 +155,7 @@ export function PassengerLiveClient() {
                             variant="outline"
                             onClick={loadLiveTransit}
                             disabled={isLoading}
-                            className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
+                            className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent"
                         >
                             {isLoading ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -170,17 +170,17 @@ export function PassengerLiveClient() {
 
             <div className="space-y-4">
                 {selectedVehicle ? (
-                    <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                    <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                         <CardContent className="p-5">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    <p className="text-sm text-[#757780]">
                                         Nearest recommended vehicle
                                     </p>
                                     <h2 className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold tracking-tight">
                                         {selectedVehicle.code}
                                     </h2>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    <p className="mt-1 text-sm text-[#757780]">
                                         {selectedVehicle.route?.name ?? "Unassigned route"}
                                     </p>
                                 </div>
@@ -189,9 +189,9 @@ export function PassengerLiveClient() {
                             </div>
 
                             <div className="mt-5 grid grid-cols-2 gap-3">
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <Clock3 className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <Clock3 className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Arrives in
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold">
@@ -199,9 +199,9 @@ export function PassengerLiveClient() {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <UsersRound className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <UsersRound className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Passenger
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold">
@@ -209,9 +209,9 @@ export function PassengerLiveClient() {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <Navigation className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <Navigation className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Distance
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold">
@@ -219,9 +219,9 @@ export function PassengerLiveClient() {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <Bus className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <Bus className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Speed
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold">
@@ -234,14 +234,14 @@ export function PassengerLiveClient() {
                                 <StatusBadge status={selectedVehicle.type} />
                                 <StatusBadge status={selectedVehicle.status} />
                                 <StatusBadge status={selectedVehicle.trafficLevel} />
-                                <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                     {Math.round(selectedVehicle.confidence * 100)}% confidence
                                 </span>
                             </div>
 
-                            <div className="mt-5 rounded-xl border border-slate-200 p-4 dark:border-white/10">
+                            <div className="mt-5 rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]">
                                 <p className="text-sm font-medium">Route information</p>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                <p className="mt-1 text-sm text-[#757780]">
                                     {selectedVehicle.route
                                         ? `${selectedVehicle.route.origin} → ${selectedVehicle.route.destination}`
                                         : "No route assigned"}
@@ -251,12 +251,12 @@ export function PassengerLiveClient() {
                     </Card>
                 ) : null}
 
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                     <CardContent className="p-5">
                         <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                             Nearby transit
                         </h2>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-sm text-[#757780]">
                             Sorted by fastest arrival time.
                         </p>
 
@@ -270,13 +270,13 @@ export function PassengerLiveClient() {
                                         onClick={() => setSelectedVehicleId(vehicle.id)}
                                         className={`w-full rounded-xl border p-4 text-left transition ${isSelected
                                             ? "border-cyan-300 bg-cyan-50 dark:border-cyan-400/30 dark:bg-cyan-400/10"
-                                            : "border-slate-200 bg-white hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5"
+                                            : "border-gray-100 bg-white hover:bg-[#f9fafb] dark:border-white/[0.07] dark:bg-transparent dark:hover:bg-white/5"
                                             }`}
                                     >
                                         <div className="flex items-start justify-between gap-4">
                                             <div>
                                                 <p className="font-medium">{vehicle.code}</p>
-                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                <p className="mt-1 text-sm text-[#757780]">
                                                     {vehicle.route?.name ?? "Unassigned route"}
                                                 </p>
                                             </div>
@@ -288,10 +288,10 @@ export function PassengerLiveClient() {
 
                                         <div className="mt-3 flex flex-wrap items-center gap-2">
                                             <StatusBadge status={vehicle.crowdLevel} />
-                                            <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                            <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                                 {vehicle.passengerCount}/{vehicle.capacity} passengers
                                             </span>
-                                            <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                            <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                                 {vehicle.distanceToUserKm} km away
                                             </span>
                                         </div>

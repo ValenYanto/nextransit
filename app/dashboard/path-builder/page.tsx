@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PathBuilderActions } from "@/components/admin/path-builder-actions";
 import { PathBuilderMapWrapper } from "@/components/admin/path-builder-map-wrapper";
 import { MetricCard } from "@/components/shared/metric-card";
-import { PageHeading } from "@/components/shared/page-heading";
 import { StatusBadge } from "@/components/shared/status-badge";
 
 export const dynamic = "force-dynamic";
@@ -50,12 +49,17 @@ export default async function PathBuilderPage() {
     const rebuildReady = routes.filter((route) => route.schedules.length > 1).length;
 
     return (
-        <div>
-            <PageHeading
-                label="Path Builder"
-                title="Route geometry generation"
-                description="Generate realistic path points from ordered stops. Bus and feeder routes use OSRM road geometry; MRT/LRT use OSM rail geometry or curated rail alignment."
-            />
+        <div className="space-y-6">
+            <div>
+                <p className="text-sm text-[#757780]">Path Builder</p>
+                <h1 className="mt-1 text-3xl font-semibold text-[#001011] dark:text-[#FFFFFC]">
+                    Build route paths visually
+                </h1>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-[#757780]">
+                    Select a route, review current stops, click on the map to draft path points,
+                    and save a clean manual path when operator adjustment is needed.
+                </p>
+            </div>
 
             <div className="grid gap-4 md:grid-cols-3">
                 <MetricCard title="Route Paths" value={routes.length} description="Managed corridors and lines" icon={RouteIcon} />
@@ -63,7 +67,7 @@ export default async function PathBuilderPage() {
                 <MetricCard title="Ready to Build" value={rebuildReady} description="Routes with 2+ stops" icon={Compass} />
             </div>
 
-            <div className="mt-6">
+            <div>
                 <PathBuilderMapWrapper
                     routes={routes.map((route) => ({
                         id: route.id,
@@ -94,22 +98,22 @@ export default async function PathBuilderPage() {
                 />
             </div>
 
-            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2">
                 {routes.map((route) => (
-                    <Card key={route.id} className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                    <Card key={route.id} className="rounded-2xl border-black/10 bg-white shadow-none dark:border-white/10 dark:bg-[#0a1a1c]">
                         <CardContent className="p-5">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
                                     <div className="flex flex-wrap items-center gap-2">
                                         <StatusBadge status={route.type} />
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">{route.code} · {route.mode?.name ?? "No mode"}</span>
+                                        <span className="text-xs text-[#757780]">{route.code} · {route.mode?.name ?? "No mode"}</span>
                                     </div>
                                     <h2 className="mt-3 font-[var(--font-jakarta)] text-lg font-semibold">{route.name}</h2>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    <p className="mt-1 text-sm text-[#757780]">
                                         {route.origin} to {route.destination}
                                     </p>
                                 </div>
-                                <GitBranch className="h-5 w-5 text-cyan-600 dark:text-cyan-300" />
+                                <GitBranch className="h-5 w-5 text-[#6CCFF6]" />
                             </div>
 
                             <div className="mt-5 grid grid-cols-2 gap-3">
@@ -124,9 +128,9 @@ export default async function PathBuilderPage() {
 
                             <div className="mt-5 space-y-2">
                                 {route.schedules.map((schedule) => (
-                                    <div key={schedule.id} className="rounded-xl border border-slate-200 px-3 py-2 text-sm dark:border-white/10">
+                                    <div key={schedule.id} className="rounded-xl border border-black/10 px-3 py-2 text-sm dark:border-white/10">
                                         <span className="font-medium">{schedule.sequence}. {schedule.stop.name}</span>
-                                        <span className="ml-2 text-xs text-slate-500 dark:text-slate-400">
+                                        <span className="ml-2 text-xs text-[#757780]">
                                             {schedule.stop.latitude.toFixed(4)}, {schedule.stop.longitude.toFixed(4)}
                                         </span>
                                     </div>
@@ -139,14 +143,14 @@ export default async function PathBuilderPage() {
                                         <PathBuilderActions routeId={route.id} routeType={route.type} />
                                         {route.type === "MRT" || route.type === "LRT" ? (
                                             <p className="rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs text-cyan-700 dark:border-cyan-400/20 dark:bg-cyan-400/10 dark:text-cyan-300">
-                                                Rail routes use OSM rail geometry or curated rail alignment, not OSRM driving.
+                                                Rail routes use track alignment, not road driving.
                                             </p>
                                         ) : null}
                                     </div>
                                 ) : null}
                                 <form action={clearPath}>
                                     <input type="hidden" name="routeId" value={route.id} />
-                                    <Button variant="outline" className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent">
+                                    <Button variant="outline" className="rounded-xl border-[#6CCFF6] bg-transparent text-[#6CCFF6] shadow-none">
                                         Clear path
                                     </Button>
                                 </form>
@@ -161,8 +165,8 @@ export default async function PathBuilderPage() {
 
 function Metric({ label, value }: { label: string; value: string | number }) {
     return (
-        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-            <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
+        <div className="rounded-xl bg-[#757780]/10 p-3">
+            <p className="text-xs text-[#757780]">{label}</p>
             <p className="mt-1 text-sm font-semibold">{value}</p>
         </div>
     );

@@ -60,7 +60,7 @@ export default async function InterchangesPage() {
                     return (
                         <Card
                             key={stop.id}
-                            className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950"
+                            className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]"
                         >
                             <CardContent className="p-5">
                                 <div className="flex items-start justify-between gap-4">
@@ -71,11 +71,11 @@ export default async function InterchangesPage() {
                                         <h2 className="mt-2 font-[var(--font-jakarta)] text-xl font-semibold">
                                             {stop.name}
                                         </h2>
-                                        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                        <p className="mt-2 text-sm leading-6 text-[#757780]">
                                             Supports passenger transfer recommendation, route planning,
                                             headway monitoring, and rush hour simulation.
                                         </p>
-                                        <p className="mt-2 text-xs font-medium text-cyan-700 dark:text-cyan-300">
+                                        <p className="mt-2 text-xs font-medium text-[#6CCFF6]">
                                             Simulated transfer crowd risk: {risk}
                                         </p>
                                     </div>
@@ -86,7 +86,7 @@ export default async function InterchangesPage() {
                                     {routeLabels.map((route) => (
                                         <span
                                             key={`${stop.id}-${route.code}`}
-                                            className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400"
+                                            className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]"
                                         >
                                             {route.code} · {route.mode}
                                         </span>

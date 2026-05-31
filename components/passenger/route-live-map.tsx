@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import L from "leaflet";
 import {
     Circle,
@@ -10,6 +10,7 @@ import {
     Polyline,
     Popup,
     TileLayer,
+    Tooltip,
     useMap,
     useMapEvents,
 } from "react-leaflet";
@@ -96,23 +97,27 @@ type RouteLiveMapProps = {
     onManualLocationSelect: (location: { latitude: number; longitude: number }) => void;
 };
 
-const vehicleIcon = L.divIcon({
-    className: "",
-    html: '<div class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-cyan-600 text-[10px] font-bold text-white shadow-sm">V</div>',
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-});
+function getVehicleIcon(type: string, selected: boolean) {
+    const normalized = type.toUpperCase();
+    const icon = normalized === "MRT" ? "🚇" : normalized === "LRT" ? "🚈" : normalized === "FEEDER" ? "🚐" : "🚌";
+    const size = selected ? 38 : 32;
 
-const selectedVehicleIcon = L.divIcon({
-    className: "",
-    html: '<div class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-slate-950 text-[11px] font-bold text-white shadow-md">LIVE</div>',
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-});
+    return L.divIcon({
+        className: "",
+        html: `<div style="
+            width:${size}px; height:${size}px;
+            background:#001011; border:2px solid #6CCFF6;
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            font-size:${selected ? 17 : 14}px; box-shadow:0 2px 8px rgba(0,0,0,0.3);
+        ">${icon}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+    });
+}
 
 const userIcon = L.divIcon({
     className: "",
-    html: '<div class="h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-[0_0_0_8px_rgba(37,99,235,0.18)]"></div>',
+    html: '<div class="h-4 w-4 rounded-full border-2 border-white bg-[#6CCFF6] shadow-[0_0_0_8px_rgba(108,207,246,0.25)]"></div>',
     iconSize: [16, 16],
     iconAnchor: [8, 8],
 });
@@ -133,18 +138,27 @@ export function RouteLiveMap({
 }: RouteLiveMapProps) {
     const lineSource = pathPoints.length > 0 ? pathPoints : stops;
     const routeLine = lineSource.map((point) => [point.latitude, point.longitude] as [number, number]);
-    const center = routeLine[0] ?? [-6.2008, 106.8229];
+    const center = useMemo(() => {
+        const points = routeLine.length > 0 ? routeLine : stops.map((stop) => [stop.latitude, stop.longitude] as [number, number]);
+        if (points.length === 0) return [-6.2008, 106.8229] as [number, number];
+        return [
+            points.reduce((sum, point) => sum + point[0], 0) / points.length,
+            points.reduce((sum, point) => sum + point[1], 0) / points.length,
+        ] as [number, number];
+    }, [routeLine, stops]);
 
     return (
-        <div className="h-[460px] overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950 md:h-[560px]">
-            <MapContainer center={center} zoom={12} scrollWheelZoom className="h-full w-full">
+        <div className="h-[45vh] max-h-[350px] min-h-[320px] overflow-hidden rounded-2xl bg-white dark:bg-[#0a1a1c] md:h-full md:max-h-none md:min-h-0">
+            <MapContainer center={center} zoom={13} scrollWheelZoom className="h-full w-full">
                 <ManualLocationPicker
                     enabled={isManualLocationMode}
                     onSelect={onManualLocationSelect}
                 />
                 <TileLayer
-                    attribution="&copy; OpenStreetMap contributors"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    subdomains={["a", "b", "c", "d"]}
+                    maxZoom={19}
                 />
 
                 <FitMap
@@ -155,43 +169,56 @@ export function RouteLiveMap({
                 />
 
                 {routeLine.length > 1 ? (
-                    <Polyline
-                        positions={routeLine}
-                        pathOptions={{
-                            color: "#0891b2",
-                            weight: 5,
-                            opacity: 0.85,
-                            lineCap: "round",
-                            lineJoin: "round",
-                        }}
-                    />
+                    <>
+                        <Polyline
+                            positions={routeLine}
+                            pathOptions={{
+                                color: "#FFFFFF",
+                                weight: 9,
+                                opacity: 0.7,
+                                lineCap: "round",
+                                lineJoin: "round",
+                            }}
+                        />
+                        <Polyline
+                            positions={routeLine}
+                            pathOptions={{
+                                color: "#6CCFF6",
+                                weight: 5,
+                                opacity: 1,
+                                lineCap: "round",
+                                lineJoin: "round",
+                            }}
+                        />
+                    </>
                 ) : null}
 
                 {stops.map((stop) => (
                     <CircleMarker
                         key={stop.id}
                         center={[stop.latitude, stop.longitude]}
-                        radius={selectedStopId === stop.id ? 9 : 6}
+                        radius={selectedStopId === stop.id ? 10 : 7}
                         pathOptions={{
-                            color: selectedStopId === stop.id ? "#0f172a" : "#0891b2",
-                            weight: 2,
-                            fillColor: "#ffffff",
+                            color: selectedStopId === stop.id ? "#001011" : "#6CCFF6",
+                            weight: selectedStopId === stop.id ? 2 : 2.5,
+                            fillColor: selectedStopId === stop.id ? "#6CCFF6" : "#FFFFFC",
                             fillOpacity: 1,
                         }}
                         eventHandlers={{
                             click: () => onSelectStop(stop.id),
                         }}
                     >
+                        <Tooltip>{stop.name}</Tooltip>
                         <Popup>
                             <div className="min-w-48 space-y-1">
                                 <p className="font-semibold">{stop.name}</p>
-                                <p className="text-xs text-slate-600">
+                                <p className="text-xs text-[#757780]">
                                     Stop {stop.sequence} · {stop.type}
                                 </p>
-                                <p className="text-xs text-slate-600">
+                                <p className="text-xs text-[#757780]">
                                     Scheduled arrival {stop.arrivalTime}
                                 </p>
-                                <p className="text-xs text-slate-600">{routeName}</p>
+                                <p className="text-xs text-[#757780]">{routeName}</p>
                             </div>
                         </Popup>
                     </CircleMarker>
@@ -210,7 +237,7 @@ export function RouteLiveMap({
                                 vehicle.position.latitude,
                                 vehicle.position.longitude,
                             ]}
-                            icon={selectedVehicleId === vehicle.id ? selectedVehicleIcon : vehicleIcon}
+                            icon={getVehicleIcon(vehicle.type, selectedVehicleId === vehicle.id)}
                             eventHandlers={{
                                 click: () => onSelectVehicle(vehicle.id),
                             }}
@@ -219,14 +246,14 @@ export function RouteLiveMap({
                                 <div className="min-w-56 space-y-2">
                                     <div>
                                         <p className="font-semibold">{vehicle.code}</p>
-                                        <p className="text-xs text-slate-600">{vehicle.directionLabel}</p>
+                                        <p className="text-xs text-[#757780]">{vehicle.directionLabel}</p>
                                     </div>
                                     <div className="flex flex-wrap gap-1.5">
                                         <StatusBadge status={vehicle.crowdLevel} />
                                         <StatusBadge status={vehicle.status} />
                                         <StatusBadge status={vehicle.type} />
                                     </div>
-                                    <div className="text-xs text-slate-600">
+                                    <div className="text-xs text-[#757780]">
                                         <p>Next stop: {vehicle.nextStop?.name ?? "Terminal"}</p>
                                         <p>Arrives in: {vehicle.etaToNextStopFormatted}</p>
                                         <p>
@@ -234,7 +261,7 @@ export function RouteLiveMap({
                                         </p>
                                         <p>Speed: {vehicle.position.speedKmh} km/h</p>
                                     </div>
-                                    <div className="rounded-lg bg-slate-50 p-2 text-xs text-slate-700">
+                                    <div className="rounded-lg bg-[#6CCFF6]/10 p-2 text-xs text-[#001011]">
                                         <p className="font-medium">{recommendation.label}</p>
                                         <p>{recommendation.description}</p>
                                     </div>
@@ -250,10 +277,10 @@ export function RouteLiveMap({
                             center={[userLocation.latitude, userLocation.longitude]}
                             radius={Math.max(userLocation.accuracy, 10)}
                             pathOptions={{
-                                color: "#2563eb",
+                                color: "#6CCFF6",
                                 weight: 1,
                                 opacity: 0.25,
-                                fillColor: "#2563eb",
+                                fillColor: "#6CCFF6",
                                 fillOpacity: 0.08,
                             }}
                         />
@@ -264,14 +291,14 @@ export function RouteLiveMap({
                             <Popup>
                                 <div className="space-y-1">
                                     <p className="font-semibold">Your location</p>
-                                    <p className="text-xs text-slate-600">
+                                    <p className="text-xs text-[#757780]">
                                         Source: {formatLocationSource(userLocation.source)}
                                     </p>
-                                    <p className="text-xs text-slate-600">
+                                    <p className="text-xs text-[#757780]">
                                         Accuracy: {Math.round(userLocation.accuracy)} m
                                     </p>
                                     {nearestStop ? (
-                                        <p className="text-xs text-slate-600">
+                                        <p className="text-xs text-[#757780]">
                                             Nearest stop: {nearestStop.name} ({nearestStop.distanceKm.toFixed(2)} km)
                                         </p>
                                     ) : null}
@@ -339,7 +366,7 @@ function FitMap({
         ];
 
         if (points.length > 0) {
-            map.fitBounds(points, { padding: [36, 36], maxZoom: 14 });
+            map.fitBounds(points, { padding: [40, 40], maxZoom: 15 });
         }
     }, [map, stops, pathPoints, vehicles, userLocation]);
 

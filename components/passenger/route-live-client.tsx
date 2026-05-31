@@ -1,666 +1,617 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ComponentType } from "react";
-import {
-    AlertCircle,
-    Clock3,
-    Loader2,
-    LocateFixed,
-    MapPin,
-    RefreshCw,
-    Route,
-    UsersRound,
-    Wifi,
-} from "lucide-react";
+import type { ReactNode } from "react";
+import { Clock3, Loader2, LocateFixed, MapPin, RefreshCw, UsersRound, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { BoardingAdvice } from "@/components/ui/boarding-advice";
+import { CrowdBadge } from "@/components/ui/crowd-badge";
 import { RouteLiveMapWrapper } from "@/components/passenger/route-live-map-wrapper";
 import { getDistanceKm } from "@/lib/geo";
 import { getBoardingRecommendation } from "@/lib/recommendation/boarding";
 import type {
-    RouteLiveStop,
-    RouteLiveVehicle,
-    RoutePathPoint,
-    UserLocation,
+  RouteLiveStop,
+  RouteLiveVehicle,
+  RoutePathPoint,
+  UserLocation,
 } from "@/components/passenger/route-live-map";
 
 type LiveRouteResponse = {
-    route: {
-        id: string;
-        code: string;
-        name: string;
-        type: string;
-        origin: string;
-        destination: string;
-        distanceKm: number;
-        pathSource: string | null;
-        pathPointCount: number;
-        pathUpdatedAt: string | null;
-        geometryStatus?: string;
-        geometryReason?: string | null;
-        maxJumpKm?: number;
-    };
-    mode: {
-        id: string;
-        name: string;
-        slug: string;
-        color: string | null;
-        icon: string | null;
-    } | null;
-    stops: RouteLiveStop[];
-    pathPoints: RoutePathPoint[];
-    vehicles: RouteLiveVehicle[];
-    generatedAt: string;
+  route: {
+    id: string;
+    code: string;
+    name: string;
+    type: string;
+    origin: string;
+    destination: string;
+    distanceKm: number;
+    pathSource: string | null;
+    pathPointCount: number;
+    pathUpdatedAt: string | null;
+    geometryStatus?: string;
+    geometryReason?: string | null;
+    maxJumpKm?: number;
+  };
+  mode: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string | null;
+    icon: string | null;
+  } | null;
+  stops: RouteLiveStop[];
+  pathPoints: RoutePathPoint[];
+  vehicles: RouteLiveVehicle[];
+  stopETAs: StopETA[];
+  generatedAt: string;
+};
+
+type StopETA = {
+  stopId: string;
+  stopName: string;
+  vehicles: Array<{
+    vehicleId: string;
+    vehicleCode: string;
+    direction: VehicleDirection;
+    etaMinutes: number;
+    etaLabel: string;
+    nextStopName: string;
+    occupancy: number;
+    capacity: number;
+    crowdLevel: "LOW" | "MODERATE" | "HIGH";
+  }>;
 };
 
 type GpsState = "idle" | "enabled" | "disabled" | "unavailable";
 type VehicleDirection = "OUTBOUND" | "INBOUND";
 
 const JAKARTA_FALLBACK: UserLocation = {
-    latitude: -6.2008,
-    longitude: 106.8229,
-    accuracy: 1500,
-    source: "fallback",
-    updatedAt: new Date(0).toISOString(),
+  latitude: -6.2008,
+  longitude: 106.8229,
+  accuracy: 1500,
+  source: "fallback",
+  updatedAt: new Date(0).toISOString(),
 };
 
 export function RouteLiveClient({
-    routeId,
-    initialData,
+  routeId,
+  initialData,
 }: {
-    routeId: string;
-    initialData: LiveRouteResponse;
+  routeId: string;
+  initialData: LiveRouteResponse;
 }) {
-    const [data, setData] = useState(initialData);
-    const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(
-        initialData.vehicles[0]?.id ?? null,
-    );
-    const [selectedStopId, setSelectedStopId] = useState<string | null>(
-        initialData.stops[0]?.id ?? null,
-    );
-    const [selectedDirection, setSelectedDirection] = useState<VehicleDirection>("OUTBOUND");
-    const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-    const [gpsState, setGpsState] = useState<GpsState>("idle");
-    const [isManualLocationMode, setIsManualLocationMode] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const gpsWatchIdRef = useRef<number | null>(null);
+  const [data, setData] = useState(initialData);
+  const [selectedDirection, setSelectedDirection] = useState<VehicleDirection>("OUTBOUND");
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [selectedStopId, setSelectedStopId] = useState<string | null>(initialData.stops[0]?.id ?? null);
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [gpsState, setGpsState] = useState<GpsState>("idle");
+  const [isManualLocationMode, setIsManualLocationMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [friendlyError, setFriendlyError] = useState<string | null>(null);
+  const gpsWatchIdRef = useRef<number | null>(null);
 
-    const stopGpsWatch = useCallback(() => {
-        if (gpsWatchIdRef.current !== null && "geolocation" in navigator) {
-            navigator.geolocation.clearWatch(gpsWatchIdRef.current);
-            gpsWatchIdRef.current = null;
-        }
-    }, []);
+  const stopGpsWatch = useCallback(() => {
+    if (gpsWatchIdRef.current !== null && "geolocation" in navigator) {
+      navigator.geolocation.clearWatch(gpsWatchIdRef.current);
+      gpsWatchIdRef.current = null;
+    }
+  }, []);
 
-    const loadLiveData = useCallback(async ({ move = false } = {}) => {
-        setIsLoading(true);
-        setError(null);
+  const loadLiveData = useCallback(async ({ move = false } = {}) => {
+    setIsLoading(true);
+    setFriendlyError(null);
 
-        try {
-            if (move) {
-                await fetch("/api/simulator/move-vehicles", {
-                    method: "POST",
-                    cache: "no-store",
-                });
-            }
+    try {
+      if (move) {
+        await fetch("/api/simulator/move-vehicles", { method: "POST", cache: "no-store" });
+      }
 
-            const response = await fetch(`/api/passenger/routes/${routeId}/live`, {
-                cache: "no-store",
-            });
-            const json = (await response.json()) as LiveRouteResponse | { message?: string };
+      const response = await fetch(`/api/passenger/routes/${routeId}/live`, { cache: "no-store" });
+      const json = (await response.json()) as LiveRouteResponse | { message?: string };
 
-            if (!response.ok) {
-                throw new Error("message" in json ? json.message : "Failed to load live route.");
-            }
+      if (!response.ok) {
+        throw new Error("message" in json ? json.message : "Unable to refresh live data.");
+      }
 
-            setData(json as LiveRouteResponse);
-        } catch (liveError) {
-            setError(liveError instanceof Error ? liveError.message : "Failed to load live route.");
-        } finally {
-            setIsLoading(false);
-        }
-    }, [routeId]);
+      setData(json as LiveRouteResponse);
+    } catch {
+      setFriendlyError("Live data could not be refreshed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [routeId]);
 
-    const enableGps = useCallback(() => {
-        if (!("geolocation" in navigator)) {
-            setGpsState("unavailable");
-            setUserLocation({
-                ...JAKARTA_FALLBACK,
-                updatedAt: new Date().toISOString(),
-            });
-            return;
-        }
+  const enableGps = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      setGpsState("unavailable");
+      setUserLocation({ ...JAKARTA_FALLBACK, updatedAt: new Date().toISOString() });
+      return;
+    }
 
-        stopGpsWatch();
-        setIsManualLocationMode(false);
-        setGpsState("idle");
-        const watchId = navigator.geolocation.watchPosition(
-            (position) => {
-                setGpsState("enabled");
-                setUserLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    accuracy: position.coords.accuracy,
-                    source: "gps",
-                    updatedAt: new Date(position.timestamp).toISOString(),
-                });
-            },
-            (positionError) => {
-                setGpsState("disabled");
-                setUserLocation({
-                    ...JAKARTA_FALLBACK,
-                    updatedAt: new Date().toISOString(),
-                });
-                if (positionError.code === positionError.PERMISSION_DENIED) {
-                    setError("GPS disabled. Use manual location or fallback Jakarta location.");
-                }
-            },
-            {
-                enableHighAccuracy: true,
-                maximumAge: 5000,
-                timeout: 15000,
-            },
-        );
-        gpsWatchIdRef.current = watchId;
+    stopGpsWatch();
+    setIsManualLocationMode(false);
 
-        return stopGpsWatch;
-    }, [stopGpsWatch]);
-
-    useEffect(() => {
-        let cleanup: (() => void) | undefined;
-        const timeout = window.setTimeout(() => {
-            cleanup = enableGps();
-        }, 0);
-
-        return () => {
-            window.clearTimeout(timeout);
-            cleanup?.();
-        };
-    }, [enableGps]);
-
-    const handleManualLocationSelect = useCallback((location: { latitude: number; longitude: number }) => {
-        stopGpsWatch();
-        setGpsState("disabled");
-        setIsManualLocationMode(false);
-        setError(null);
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setGpsState("enabled");
         setUserLocation({
-            latitude: location.latitude,
-            longitude: location.longitude,
-            accuracy: 25,
-            source: "manual",
-            updatedAt: new Date().toISOString(),
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          source: "gps",
+          updatedAt: new Date(position.timestamp).toISOString(),
         });
-    }, [stopGpsWatch]);
-
-    useEffect(() => {
-        const interval = window.setInterval(() => {
-            loadLiveData({ move: process.env.NODE_ENV !== "production" });
-        }, 12000);
-
-        return () => window.clearInterval(interval);
-    }, [loadLiveData]);
-
-    const selectedVehicle = useMemo(() => {
-        return (
-            data.vehicles.find((vehicle) => vehicle.id === selectedVehicleId) ??
-            data.vehicles[0] ??
-            null
-        );
-    }, [data.vehicles, selectedVehicleId]);
-    const sortedVehicles = useMemo(() => {
-        return [...data.vehicles].sort((a, b) => {
-            const aDirectionScore = a.direction === selectedDirection ? 0 : 1;
-            const bDirectionScore = b.direction === selectedDirection ? 0 : 1;
-
-            if (aDirectionScore !== bDirectionScore) {
-                return aDirectionScore - bDirectionScore;
-            }
-
-            return (a.etaToNextStopMinutes ?? 999) - (b.etaToNextStopMinutes ?? 999);
-        });
-    }, [data.vehicles, selectedDirection]);
-
-    const orderedStops = useMemo(() => {
-        return selectedDirection === "INBOUND" ? [...data.stops].reverse() : data.stops;
-    }, [data.stops, selectedDirection]);
-
-    const selectedStop = useMemo(() => {
-        return (
-            data.stops.find((stop) => stop.id === selectedStopId) ??
-            data.stops[0] ??
-            null
-        );
-    }, [data.stops, selectedStopId]);
-
-    const nearestStop = useMemo(() => {
-        if (!userLocation || data.stops.length === 0) return null;
-
-        const nearest = data.stops.reduce<{
-            stop: RouteLiveStop;
-            distanceKm: number;
-        } | null>((currentNearest, stop) => {
-            const distanceKm = getDistanceKm(userLocation, stop);
-
-            if (!currentNearest || distanceKm < currentNearest.distanceKm) {
-                return {
-                    stop,
-                    distanceKm,
-                };
-            }
-
-            return currentNearest;
-        }, null);
-
-        if (!nearest) return null;
-
-        return {
-            id: nearest.stop.id,
-            name: nearest.stop.name,
-            distanceKm: nearest.distanceKm,
-        };
-    }, [data.stops, userLocation]);
-
-    const transferStops = data.stops.filter((stop) =>
-        ["Dukuh Atas", "Bundaran HI", "Lebak Bulus", "Blok M", "Fatmawati"].some(
-            (name) => stop.name.includes(name),
-        ),
+      },
+      () => {
+        setGpsState("disabled");
+        setUserLocation({ ...JAKARTA_FALLBACK, updatedAt: new Date().toISOString() });
+        setFriendlyError("Location is off. You can pin your location manually on the map.");
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
     );
-    const outboundLabel = `${data.route.origin} → ${data.route.destination}`;
-    const inboundLabel = `${data.route.destination} → ${data.route.origin}`;
-    const debugGeometry = process.env.NODE_ENV !== "production";
 
-    return (
-        <div className="space-y-5">
-            <div className="grid gap-5 xl:grid-cols-[1fr_380px]">
-                <div className="space-y-4">
-                    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-none dark:border-white/10 dark:bg-slate-950">
-                        <p className="mb-2 px-1 text-xs font-medium text-slate-500 dark:text-slate-400">
-                            Choose direction
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setSelectedDirection("OUTBOUND")}
-                                className={`rounded-xl border px-3 py-3 text-left text-sm font-medium transition ${selectedDirection === "OUTBOUND"
-                                    ? "border-cyan-300 bg-cyan-50 text-cyan-800 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200"
-                                    : "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-transparent dark:text-slate-300"
-                                    }`}
-                            >
-                                {outboundLabel}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => setSelectedDirection("INBOUND")}
-                                className={`rounded-xl border px-3 py-3 text-left text-sm font-medium transition ${selectedDirection === "INBOUND"
-                                    ? "border-cyan-300 bg-cyan-50 text-cyan-800 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-200"
-                                    : "border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-transparent dark:text-slate-300"
-                                    }`}
-                            >
-                                {inboundLabel}
-                            </button>
-                        </div>
+    gpsWatchIdRef.current = watchId;
+  }, [stopGpsWatch]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(enableGps, 0);
+    return () => {
+      window.clearTimeout(timeout);
+      stopGpsWatch();
+    };
+  }, [enableGps, stopGpsWatch]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      loadLiveData({ move: process.env.NODE_ENV !== "production" });
+    }, 12000);
+
+    return () => window.clearInterval(interval);
+  }, [loadLiveData]);
+
+  const directionVehicles = useMemo(
+    () => data.vehicles.filter((vehicle) => vehicle.direction === selectedDirection),
+    [data.vehicles, selectedDirection],
+  );
+  const selectedVehicle = useMemo(() => {
+    return directionVehicles.find((vehicle) => vehicle.id === selectedVehicleId) ?? null;
+  }, [directionVehicles, selectedVehicleId]);
+  const sortedVehicles = useMemo(() => {
+    return [...directionVehicles].sort(
+      (a, b) => (a.etaToNextStopMinutes ?? 999) - (b.etaToNextStopMinutes ?? 999),
+    );
+  }, [directionVehicles]);
+  const orderedStops = useMemo(
+    () => (selectedDirection === "INBOUND" ? [...data.stops].reverse() : data.stops),
+    [data.stops, selectedDirection],
+  );
+  const nearestStop = useMemo(() => {
+    if (!userLocation || data.stops.length === 0) return null;
+    const nearest = data.stops.reduce<{ stop: RouteLiveStop; distanceKm: number } | null>(
+      (current, stop) => {
+        const distanceKm = getDistanceKm(userLocation, stop);
+        if (!current || distanceKm < current.distanceKm) return { stop, distanceKm };
+        return current;
+      },
+      null,
+    );
+    return nearest ? { id: nearest.stop.id, name: nearest.stop.name, distanceKm: nearest.distanceKm } : null;
+  }, [data.stops, userLocation]);
+  const transferStops = data.stops.filter((stop) =>
+    ["Dukuh Atas", "Bundaran HI", "Lebak Bulus", "Blok M", "Fatmawati", "Harmoni"].some((name) =>
+      stop.name.includes(name),
+    ),
+  );
+
+  const outboundLabel = `${data.route.origin} → ${data.route.destination}`;
+  const inboundLabel = `${data.route.destination} → ${data.route.origin}`;
+
+  function handleManualLocationSelect(location: { latitude: number; longitude: number }) {
+    stopGpsWatch();
+    setGpsState("disabled");
+    setIsManualLocationMode(false);
+    setFriendlyError(null);
+    setUserLocation({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      accuracy: 25,
+      source: "manual",
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-3xl border border-gray-100 bg-white px-4 py-3 dark:border-white/[0.07] dark:bg-[#0d1f22]">
+        <div className="flex items-start gap-3">
+          <div>
+            <div className="mb-0.5 flex flex-wrap items-center gap-2">
+              <span className="rounded-lg bg-[#6CCFF6]/10 px-2.5 py-0.5 font-mono text-xs font-bold text-[#6CCFF6]">
+                {data.route.code}
+              </span>
+              <span className="rounded-full bg-[#10B981]/10 px-2.5 py-0.5 text-xs font-semibold text-[#10B981]">
+                {data.mode?.name ?? data.route.type}
+              </span>
+            </div>
+            <h1 className="text-base font-bold text-[#001011] dark:text-[#FFFFFC]">
+              {data.route.name}
+            </h1>
+            <p className="mt-0.5 text-xs text-[#757780]">
+              {data.stops.length} stops · {data.vehicles.length} live units · see arrival time, passengers, crowd, and boarding advice.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-[#757780]/10 p-1">
+        <div className="grid grid-cols-2 gap-1">
+          <DirectionButton
+            active={selectedDirection === "OUTBOUND"}
+            label={`→ ${data.route.destination}`}
+            detail={outboundLabel}
+            onClick={() => {
+              setSelectedDirection("OUTBOUND");
+              setSelectedVehicleId(null);
+            }}
+          />
+          <DirectionButton
+            active={selectedDirection === "INBOUND"}
+            label={`← ${data.route.origin}`}
+            detail={inboundLabel}
+            onClick={() => {
+              setSelectedDirection("INBOUND");
+              setSelectedVehicleId(null);
+            }}
+          />
+        </div>
+      </section>
+
+      <div className="grid gap-4 md:h-[calc(100vh-190px)] md:grid-cols-[380px_1fr]">
+        <aside className="order-2 min-h-0 space-y-4 overflow-y-auto md:order-1">
+          {isManualLocationMode ? (
+            <p className="rounded-2xl border border-[#6CCFF6]/30 bg-[#6CCFF6]/10 p-3 text-sm text-[#757780]">
+              Click the map to pin your location.
+            </p>
+          ) : null}
+          {friendlyError ? (
+            <p className="rounded-2xl border border-[#757780]/30 bg-[#757780]/10 p-3 text-sm text-[#757780]">
+              {friendlyError}
+            </p>
+          ) : null}
+          {gpsState === "unavailable" ? (
+            <p className="rounded-2xl border border-[#757780]/30 bg-[#757780]/10 p-3 text-sm text-[#757780]">
+              Location is unavailable in this browser. You can still pin your location manually.
+            </p>
+          ) : null}
+          {userLocation?.source === "gps" && userLocation.accuracy > 500 ? (
+            <p className="rounded-2xl border border-[#757780]/30 bg-[#757780]/10 p-3 text-sm text-[#757780]">
+              Your location accuracy is low. Pin your location manually for a better arrival estimate.
+            </p>
+          ) : null}
+
+          {selectedVehicle ? (
+            <SelectedVehiclePanel vehicle={selectedVehicle} onClose={() => setSelectedVehicleId(null)} />
+          ) : null}
+
+          <section className="rounded-3xl border border-black/10 bg-white p-4 dark:border-white/[0.07] dark:bg-[#0d1f22]">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-[15px] font-medium">Vehicles on this route</h2>
+                <p className="text-sm text-[#757780]">{directionVehicles.length} going this way</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => loadLiveData({ move: true })}
+                disabled={isLoading}
+                className="min-h-10 rounded-xl border border-[#6CCFF6] px-3 text-sm font-semibold text-[#6CCFF6]"
+              >
+                {isLoading ? <Loader2 className="mr-2 inline h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 inline h-4 w-4" />}
+                Refresh
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {sortedVehicles.map((vehicle) => (
+                <VehicleRow
+                  key={vehicle.id}
+                  vehicle={vehicle}
+                  active={selectedVehicleId === vehicle.id}
+                  onClick={() => setSelectedVehicleId(vehicle.id)}
+                />
+              ))}
+              {sortedVehicles.length === 0 ? (
+                <p className="rounded-2xl border border-[#757780]/30 p-4 text-sm text-[#757780]">
+                  No vehicles currently on this route.
+                </p>
+              ) : null}
+            </div>
+          </section>
+
+          <section className="rounded-3xl border border-black/10 bg-white p-4 dark:border-white/[0.07] dark:bg-[#0d1f22]">
+            <h2 className="px-1 text-sm font-semibold text-[#001011] dark:text-[#FFFFFC]">Stops on this route</h2>
+            <div className="mt-4 space-y-0">
+              {orderedStops.map((stop, index) => {
+                const distance = userLocation ? getDistanceKm(userLocation, stop) : null;
+                const isNearest = nearestStop?.name === stop.name;
+                const stopETA = data.stopETAs.find((eta) => eta.stopId === stop.id);
+                const stopVehicles = (stopETA?.vehicles ?? []).filter((vehicle) => vehicle.direction === selectedDirection);
+                const isFirst = index === 0;
+                const isLast = index === orderedStops.length - 1;
+                return (
+                  <div key={stop.id} className="flex gap-0">
+                    <div className="relative flex w-8 shrink-0 flex-col items-center">
+                      {!isFirst ? <div className="h-4 w-0.5 shrink-0 bg-gray-200 dark:bg-white/10" /> : null}
+                      <div
+                        className={`z-10 h-3 w-3 shrink-0 rounded-full border-2 ${
+                          isNearest
+                            ? "bg-[#6CCFF6] border-[#6CCFF6] ring-4 ring-[#6CCFF6]/20"
+                            : "border-gray-300 bg-white dark:border-white/20 dark:bg-[#0d1f22]"
+                        }`}
+                      />
+                      {!isLast ? <div className="min-h-10 w-0.5 flex-1 bg-gray-200 dark:bg-white/10" /> : null}
                     </div>
 
-                    <RouteLiveMapWrapper
-                        routeName={data.route.name}
-                        stops={data.stops}
-                        pathPoints={data.pathPoints}
-                        vehicles={data.vehicles}
-                        userLocation={userLocation}
-                        nearestStop={nearestStop}
-                        isManualLocationMode={isManualLocationMode}
-                        selectedVehicleId={selectedVehicle?.id ?? null}
-                        selectedStopId={selectedStop?.id ?? null}
-                        onSelectVehicle={setSelectedVehicleId}
-                        onSelectStop={setSelectedStopId}
-                        onManualLocationSelect={handleManualLocationSelect}
-                    />
-
-                    <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                        <CardContent className="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between">
-                            <div>
-                                <p className="text-sm font-medium">Live updates</p>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Updates every 12 seconds · Last generated{" "}
-                                {new Date(data.generatedAt).toLocaleTimeString("id-ID")}
-                            </p>
-                            {debugGeometry ? (
-                                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                                Path: {data.route.pathSource ?? "UNKNOWN"} · {data.route.pathPointCount || data.pathPoints.length} points
-                                {typeof data.route.maxJumpKm === "number"
-                                    ? ` · max jump ${data.route.maxJumpKm.toFixed(2)} km`
-                                    : ""}
-                                </p>
-                            ) : null}
-                            {debugGeometry && data.route.pathSource === "RAIL_MANUAL" ? (
-                                <p className="mt-2 text-xs text-cyan-700 dark:text-cyan-300">
-                                    Curated rail alignment.
-                                </p>
-                            ) : null}
-                            {debugGeometry && data.route.pathSource === "RAIL_OSM" ? (
-                                <p className="mt-2 text-xs text-cyan-700 dark:text-cyan-300">
-                                    OSM rail geometry.
-                                </p>
-                            ) : null}
-                            {debugGeometry && data.route.geometryStatus === "invalid" ? (
-                                <p className="mt-2 text-xs text-red-600 dark:text-red-300">
-                                    Geometry warning: {data.route.geometryReason ?? "invalid route geometry"}
-                                </p>
-                            ) : null}
-                            {debugGeometry && data.route.pathSource === "FALLBACK" ? (
-                                <p className="mt-2 text-xs text-amber-600 dark:text-amber-300">
-                                    This route is using fallback geometry. Rebuild with OSRM for road-following path.
-                                </p>
-                            ) : null}
-                            {debugGeometry && data.route.pathSource === "OSRM" ? (
-                                <p className="mt-2 text-xs text-emerald-600 dark:text-emerald-300">
-                                    Road-following path generated from scheduled stops.
-                                </p>
-                            ) : null}
-                                {userLocation?.source === "gps" && userLocation.accuracy > 500 ? (
-                                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-300">
-                                        GPS accuracy is low. You can set your location manually.
-                                    </p>
-                                ) : null}
-                                {gpsState === "disabled" && userLocation?.source !== "manual" ? (
-                                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-300">
-                                        GPS disabled. Use manual location or fallback Jakarta location.
-                                    </p>
-                                ) : null}
-                                {gpsState === "unavailable" ? (
-                                    <p className="mt-2 text-xs text-amber-600 dark:text-amber-300">
-                                        Browser geolocation is unavailable. Showing fallback location.
-                                    </p>
-                                ) : null}
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {gpsState !== "enabled" ? (
-                                    <Button
-                                        variant="outline"
-                                        className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
-                                        onClick={enableGps}
-                                    >
-                                        <LocateFixed className="mr-2 h-4 w-4" />
-                                        Enable GPS
-                                    </Button>
-                                ) : null}
-                                <Button
-                                    variant={isManualLocationMode ? "default" : "outline"}
-                                    className="rounded-xl border-slate-200 shadow-none dark:border-white/10"
-                                    onClick={() => setIsManualLocationMode((enabled) => !enabled)}
-                                >
-                                    <MapPin className="mr-2 h-4 w-4" />
-                                    Set location manually
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
-                                    onClick={() => loadLiveData({ move: true })}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? (
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <RefreshCw className="mr-2 h-4 w-4" />
-                                    )}
-                                    Refresh
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <aside className="space-y-4">
-                    {error ? (
-                        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300">
-                            <AlertCircle className="mb-2 h-4 w-4" />
-                            {error}
-                        </div>
-                    ) : null}
-
-                    <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                        <CardContent className="p-5">
-                            <div className="flex items-center justify-between gap-3">
-                                <div>
-                                    <p className="text-sm font-medium">Passenger location</p>
-                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                        Browser GPS can be inaccurate on desktop. Manual pinning keeps ETA near the route.
-                                    </p>
-                                </div>
-                                <LocateFixed className="h-5 w-5 text-cyan-600 dark:text-cyan-300" />
-                            </div>
-
-                            <div className="mt-5 grid grid-cols-2 gap-3">
-                                <LocationMetric
-                                    label="Source"
-                                    value={userLocation ? formatLocationSource(userLocation.source) : "Waiting"}
-                                />
-                                <LocationMetric
-                                    label="Accuracy"
-                                    value={userLocation ? `${Math.round(userLocation.accuracy)} m` : "-"}
-                                />
-                                <LocationMetric
-                                    label="Nearest stop"
-                                    value={nearestStop?.name ?? "-"}
-                                />
-                                <LocationMetric
-                                    label="Distance"
-                                    value={nearestStop ? `${nearestStop.distanceKm.toFixed(2)} km` : "-"}
-                                />
-                            </div>
-
-                            {isManualLocationMode ? (
-                                <p className="mt-4 rounded-xl border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs text-cyan-700 dark:border-cyan-400/20 dark:bg-cyan-400/10 dark:text-cyan-300">
-                                    Click the map to place your location manually.
-                                </p>
-                            ) : null}
-                        </CardContent>
-                    </Card>
-
-                    <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                        <CardContent className="p-5">
-                            <div className="flex items-center justify-between gap-3">
-                                <div>
-                                    <p className="text-sm font-medium">Vehicles on route</p>
-                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                        {data.vehicles.filter((vehicle) => vehicle.direction === selectedDirection).length} going this way · {data.vehicles.length} total
-                                    </p>
-                                </div>
-                                <Wifi className="h-5 w-5 text-cyan-600 dark:text-cyan-300" />
-                            </div>
-
-                            <div className="mt-5 space-y-3">
-                                {sortedVehicles.map((vehicle) => {
-                                    const recommendation = getBoardingRecommendation({
-                                        crowdLevel: vehicle.crowdLevel,
-                                        etaMinutes: vehicle.etaToNextStopMinutes,
-                                    });
-
-                                    return (
-                                        <button
-                                            key={vehicle.id}
-                                            onClick={() => setSelectedVehicleId(vehicle.id)}
-                                            className={`w-full rounded-xl border p-4 text-left transition ${selectedVehicle?.id === vehicle.id
-                                                ? "border-cyan-300 bg-cyan-50 dark:border-cyan-400/30 dark:bg-cyan-400/10"
-                                                : "border-slate-200 bg-white hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5"
-                                                }`}
-                                        >
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p className="font-medium">{vehicle.code}</p>
-                                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                                        {vehicle.directionLabel}
-                                                    </p>
-                                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                                        Next stop: {vehicle.nextStop?.name ?? "Terminal"}
-                                                    </p>
-                                                </div>
-                                                <p className="text-sm font-semibold">
-                                                    {vehicle.etaToNextStopFormatted}
-                                                </p>
-                                            </div>
-                                            <div className="mt-3 flex flex-wrap gap-2">
-                                                <StatusBadge status={vehicle.crowdLevel} />
-                                                <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-                                                    Passengers {vehicle.passengerCount}/{vehicle.capacity}
-                                                </span>
-                                                <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-                                                    {vehicle.position.speedKmh} km/h
-                                                </span>
-                                            </div>
-                                            <p className="mt-3 text-xs font-medium text-cyan-700 dark:text-cyan-300">
-                                                {recommendation.label}
-                                            </p>
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {selectedVehicle ? (
-                        <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                            <CardContent className="p-5">
-                                {(() => {
-                                    const recommendation = getBoardingRecommendation({
-                                        crowdLevel: selectedVehicle.crowdLevel,
-                                        etaMinutes: selectedVehicle.etaToNextStopMinutes,
-                                    });
-
-                                    return (
-                                        <>
-                                <p className="text-sm font-medium">Selected vehicle</p>
-                                <h2 className="mt-2 font-[var(--font-jakarta)] text-2xl font-semibold">
-                                    {selectedVehicle.code}
-                                </h2>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    {selectedVehicle.directionLabel}
-                                </p>
-                                <div className="mt-5 grid grid-cols-2 gap-3">
-                                    <Detail icon={Clock3} label="Arrives in" value={selectedVehicle.etaToNextStopFormatted} />
-                                    <Detail icon={UsersRound} label="Passengers" value={`${selectedVehicle.passengerCount}/${selectedVehicle.capacity}`} />
-                                    <Detail icon={Route} label="Traffic" value={selectedVehicle.trafficLevel} />
-                                    <Detail icon={Wifi} label="Confidence" value={`${Math.round(selectedVehicle.confidence * 100)}%`} />
-                                </div>
-                                <div className="mt-4 rounded-xl border border-cyan-200 bg-cyan-50 p-3 text-sm text-cyan-800 dark:border-cyan-400/20 dark:bg-cyan-400/10 dark:text-cyan-200">
-                                    <p className="font-medium">{recommendation.label}</p>
-                                    <p className="mt-1 text-xs leading-5">{recommendation.description}</p>
-                                </div>
-                                        </>
-                                    );
-                                })()}
-                            </CardContent>
-                        </Card>
-                    ) : null}
-                </aside>
-            </div>
-
-            <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                    <CardContent className="p-5">
-                        <h2 className="font-[var(--font-jakarta)] text-xl font-semibold">
-                            Stops and next arrivals
-                        </h2>
-                        <div className="mt-5 grid gap-3 md:grid-cols-2">
-                            {orderedStops.map((stop, index) => (
-                                <button
-                                    key={stop.id}
-                                    onClick={() => setSelectedStopId(stop.id)}
-                                    className={`rounded-xl border p-4 text-left ${selectedStop?.id === stop.id
-                                        ? "border-cyan-300 bg-cyan-50 dark:border-cyan-400/30 dark:bg-cyan-400/10"
-                                        : "border-slate-200 bg-white dark:border-white/10 dark:bg-transparent"
-                                        }`}
-                                >
-                                    <div className="flex items-center justify-between gap-3">
-                                        <p className="font-medium">{index + 1}. {stop.name}</p>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                                            {stop.arrivalTime}
-                                        </span>
-                                    </div>
-                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                        {stop.area ?? "Jakarta"} · {stop.type}
-                                    </p>
-                                </button>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                    <CardContent className="p-5">
-                        <h2 className="font-[var(--font-jakarta)] text-xl font-semibold">
-                            Intermodal recommendation
-                        </h2>
-                        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                            Use transfer points to combine feeder, TransJakarta, MRT, and LRT
-                            services during rush hour. NexTransit prioritizes accurate ETA,
-                            passenger density, and headway reliability.
+                    <div className={`ml-3 flex-1 ${isNearest ? "pb-3" : "pb-1"}`}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedStopId(stop.id)}
+                        className={`w-full rounded-xl px-3 py-2 text-left ${
+                          isNearest ? "bg-[#6CCFF6]/10" : ""
+                        }`}
+                      >
+                        <p className="text-sm font-medium text-[#001011] dark:text-[#FFFFFC]">
+                          {stop.name}
+                          {isNearest ? (
+                            <span className="ml-2 rounded-full bg-[#6CCFF6]/10 px-2 py-0.5 text-[10px] font-semibold text-[#6CCFF6]">
+                              Nearest
+                            </span>
+                          ) : null}
                         </p>
-                        <div className="mt-5 space-y-3">
-                            {(transferStops.length > 0 ? transferStops : data.stops.slice(0, 2)).map((stop) => (
-                                <div
-                                    key={stop.id}
-                                    className="rounded-xl border border-slate-200 p-4 dark:border-white/10"
-                                >
-                                    <p className="font-medium">{stop.name}</p>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                        {stop.name.includes("Dukuh Atas")
-                                            ? "Dukuh Atas supports MRT/LRT/TJ transfer."
-                                            : `${stop.name} can support route recommendation and schedule coordination.`}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                        <p className="mt-0.5 text-xs text-[#757780]">
+                          {distance ? `${distance.toFixed(2)} km from you` : stop.area ?? "Jakarta"}
+                        </p>
+                      </button>
+
+                      <div className="mx-3 mb-2 space-y-1.5">
+                        {stopVehicles.slice(0, 2).map((vehicle) => (
+                          <div
+                            key={vehicle.vehicleId}
+                            className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-3 py-2.5 dark:border-white/[0.07] dark:bg-[#0d1f22]"
+                          >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#001011] text-base dark:bg-white/5">
+                              <span>{data.route.type === "MRT" ? "🚇" : data.route.type === "LRT" ? "🚈" : data.route.type === "FEEDER" ? "🚐" : "🚌"}</span>
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="shrink-0 rounded-md bg-[#EF4444] px-2 py-0.5 text-[10px] font-bold text-white">
+                                  {vehicle.vehicleCode}
+                                </span>
+                                <span className="shrink-0 text-[11px] text-[#757780]">→</span>
+                                <span className="truncate text-[11px] font-medium text-[#001011] dark:text-[#FFFFFC]">
+                                  {vehicle.nextStopName}
+                                </span>
+                              </div>
+                              <p className="mt-0.5 text-[10px] text-[#757780]">Tujuan Akhir</p>
+                            </div>
+
+                            <div className="ml-1 shrink-0 text-right">
+                              <p className="whitespace-nowrap text-[10px] text-[#757780]">Perkiraan Kedatangan</p>
+                              <p className={`text-sm font-bold leading-tight ${getEtaTone(vehicle.etaMinutes)}`}>
+                                {vehicle.etaLabel}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+
+                        {stopVehicles.length === 0 ? (
+                          <div className="rounded-xl bg-gray-50 px-3 py-2 dark:bg-white/[0.02]">
+                            <p className="text-xs text-[#757780]">No vehicle approaching</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+          </section>
 
-            <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                <CardContent className="grid gap-4 p-5 md:grid-cols-4">
-                    <LocationMetric label="ETA reliability" value="91%" />
-                    <LocationMetric label="Path geometry" value={`${data.pathPoints.length} points`} />
-                    <LocationMetric label="Active headway" value={`${Math.max(6, Math.round(18 / Math.max(sortedVehicles.length, 1)))} min`} />
-                    <LocationMetric label="Transfer risk" value={transferStops.length > 0 ? "Monitored" : "Low"} />
-                </CardContent>
-            </Card>
-        </div>
-    );
+          {transferStops.length > 0 ? (
+            <section className="rounded-3xl border border-black/10 bg-white p-4 dark:border-white/[0.07] dark:bg-[#0d1f22]">
+              <h2 className="text-[15px] font-medium">Connections available</h2>
+              <div className="mt-4 space-y-2">
+                {transferStops.map((stop) => (
+                  <div key={stop.id} className="rounded-2xl border border-black/10 p-3 dark:border-white/[0.07]">
+                    <p className="font-medium">{stop.name}</p>
+                    <p className="mt-1 text-sm text-[#757780]">Transfer to another transport mode nearby.</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
+        </aside>
+
+        <section className="relative order-1 min-h-[45vh] md:order-2 md:min-h-0">
+          <RouteLiveMapWrapper
+            routeName={data.route.name}
+            stops={data.stops}
+            pathPoints={data.pathPoints}
+            vehicles={directionVehicles}
+            userLocation={userLocation}
+            nearestStop={nearestStop}
+            isManualLocationMode={isManualLocationMode}
+            selectedVehicleId={selectedVehicle?.id ?? null}
+            selectedStopId={selectedStopId}
+            onSelectVehicle={setSelectedVehicleId}
+            onSelectStop={setSelectedStopId}
+            onManualLocationSelect={handleManualLocationSelect}
+          />
+          <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={enableGps}
+              className="min-h-11 rounded-xl bg-[#001011] px-4 text-sm font-semibold text-[#FFFFFC] dark:bg-[#FFFFFC] dark:text-[#001011]"
+            >
+              <LocateFixed className="mr-2 inline h-4 w-4" />
+              Use my location
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsManualLocationMode((enabled) => !enabled)}
+              className="min-h-11 rounded-xl bg-white px-4 text-sm font-semibold text-[#001011] dark:bg-[#0a1a1c] dark:text-[#FFFFFC]"
+            >
+              <MapPin className="mr-2 inline h-4 w-4" />
+              Pin on map
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
 }
 
-function Detail({
-    icon: Icon,
-    label,
-    value,
+function DirectionButton({
+  active,
+  label,
+  detail,
+  onClick,
 }: {
-    icon: ComponentType<{ className?: string }>;
-    label: string;
-    value: string;
+  active: boolean;
+  label: string;
+  detail: string;
+  onClick: () => void;
 }) {
-    return (
-        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-            <Icon className="h-4 w-4 text-slate-400" />
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">{label}</p>
-            <p className="mt-1 text-sm font-semibold">{value}</p>
-        </div>
-    );
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`min-h-14 rounded-xl px-3 text-left ${
+        active
+          ? "bg-white text-[#001011] shadow-sm dark:bg-[#0a1a1c] dark:text-[#FFFFFC]"
+          : "text-[#757780]"
+      }`}
+    >
+      <span className="block text-sm font-semibold">{label}</span>
+      <span className="block truncate text-[11px] text-[#757780]">{detail}</span>
+    </button>
+  );
 }
 
-function LocationMetric({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-            <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-            <p className="mt-1 truncate text-sm font-semibold">{value}</p>
+function VehicleRow({
+  vehicle,
+  active,
+  onClick,
+}: {
+  vehicle: RouteLiveVehicle;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const recommendation = getBoardingRecommendation({
+    crowdLevel: vehicle.crowdLevel,
+    etaMinutes: vehicle.etaToNextStopMinutes,
+  });
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full rounded-2xl border p-4 text-left ${
+        active
+          ? "border-[#6CCFF6] bg-[#6CCFF6]/10"
+          : "border-black/10 bg-white dark:border-white/[0.07] dark:bg-[#001011]"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-semibold">{vehicle.code}</p>
+          <p className="mt-1 text-sm text-[#757780]">Next stop: {vehicle.nextStop?.name ?? "Terminal"}</p>
         </div>
-    );
+        <p className="text-sm font-semibold text-[#6CCFF6]">{vehicle.etaToNextStopFormatted}</p>
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <CrowdBadge level={toCrowdLevel(vehicle.crowdLevel)} />
+        <span className="rounded-full bg-[#757780]/10 px-3 py-1 text-xs font-semibold text-[#757780]">
+          {vehicle.passengerCount}/{vehicle.capacity} passengers
+        </span>
+      </div>
+      <p className="mt-3 text-sm font-semibold text-[#10B981]">{recommendation.label}</p>
+    </button>
+  );
 }
 
-function formatLocationSource(source: UserLocation["source"]) {
-    if (source === "gps") return "GPS";
-    if (source === "manual") return "Manual";
-    return "Fallback";
+function SelectedVehiclePanel({
+  vehicle,
+  onClose,
+}: {
+  vehicle: RouteLiveVehicle;
+  onClose: () => void;
+}) {
+  const recommendation = getBoardingRecommendation({
+    crowdLevel: vehicle.crowdLevel,
+    etaMinutes: vehicle.etaToNextStopMinutes,
+  });
+
+  return (
+    <section className="animate-slide-in rounded-t-3xl border border-black/10 bg-white p-5 shadow-[0_-4px_24px_rgba(0,16,17,0.15)] dark:border-white/[0.07] dark:bg-[#0a1a1c]">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm text-[#757780]">Selected vehicle</p>
+          <h2 className="mt-1 text-xl font-semibold">{vehicle.code}</h2>
+        </div>
+        <button type="button" onClick={onClose} className="rounded-full p-2 text-[#757780]">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="mt-5">
+        <p className="text-[28px] font-bold leading-tight">Arrives in {vehicle.etaToNextStopFormatted}</p>
+        <p className="mt-1 text-sm text-[#757780]">Next stop: {vehicle.nextStop?.name ?? "Terminal"}</p>
+      </div>
+
+      <div className="mt-5 grid grid-cols-3 gap-2">
+        <Stat icon={<UsersRound className="h-4 w-4" />} label="Passengers" value={`${vehicle.passengerCount}/${vehicle.capacity}`} />
+        <Stat label="Crowd" value={titleCase(vehicle.crowdLevel)} />
+        <Stat icon={<Clock3 className="h-4 w-4" />} label="Speed" value={`${vehicle.position.speedKmh} km/h`} />
+      </div>
+
+      <div className="mt-4">
+        <BoardingAdvice advice={toAdvice(recommendation.severity)} />
+      </div>
+    </section>
+  );
+}
+
+function Stat({ icon, label, value }: { icon?: ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-[#757780]/10 p-3">
+      {icon ? <div className="text-[#6CCFF6]">{icon}</div> : null}
+      <p className="mt-2 text-[11px] text-[#757780]">{label}</p>
+      <p className="mt-1 text-sm font-medium">{value}</p>
+    </div>
+  );
+}
+
+function toCrowdLevel(level: string): "low" | "moderate" | "high" {
+  const normalized = level.toUpperCase();
+  if (normalized === "LOW") return "low";
+  if (normalized === "MEDIUM") return "moderate";
+  return "high";
+}
+
+function toAdvice(severity: string): "board" | "urgent" | "wait" {
+  if (severity === "LOW" || severity === "MEDIUM") return "board";
+  if (severity === "HIGH") return "urgent";
+  return "wait";
+}
+
+function getEtaTone(etaMinutes: number) {
+  if (etaMinutes <= 3) return "text-[#10B981]";
+  if (etaMinutes <= 8) return "text-[#F59E0B]";
+  return "text-[#001011] dark:text-[#FFFFFC]";
+}
+
+function titleCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 }

@@ -37,6 +37,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
         } as React.CSSProperties
       }
       toastOptions={{
+        style: {
+          background: "#001011",
+          color: "#FFFFFC",
+          border: "1px solid rgba(108,207,246,0.2)",
+          borderRadius: "12px",
+        },
         classNames: {
           toast: "cn-toast",
         },

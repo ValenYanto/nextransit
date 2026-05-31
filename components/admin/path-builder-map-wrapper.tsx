@@ -7,7 +7,7 @@ const PathBuilderMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="flex h-[460px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400">
+            <div className="flex h-[calc(100vh-150px)] min-h-[720px] items-center justify-center rounded-2xl border border-[#e5e7eb] bg-white text-sm text-[#757780] dark:border-[#1a2f32] dark:bg-[#0d1f22]">
                 Loading builder map...
             </div>
         ),

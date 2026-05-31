@@ -1,238 +1,161 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { Bus, ChevronRight, Route, School, Search, TrainFront, TramFront } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Bus, School, Train, TramFront } from "lucide-react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/shared/status-badge";
+import { ModeCard } from "@/components/ui/mode-card";
+import { RouteCard } from "@/components/ui/route-card";
+import { SearchBar } from "@/components/ui/search-bar";
 
 type Mode = {
-    id: string;
-    name: string;
-    slug: string;
-    description: string | null;
-    color: string | null;
-    icon: string | null;
-    routeCount: number;
-    liveUnitCount: number;
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  color: string | null;
+  icon: string | null;
+  routeCount: number;
+  liveUnitCount: number;
 };
 
 type PassengerRoute = {
-    id: string;
-    code: string;
-    name: string;
-    type: string;
-    origin: string;
-    destination: string;
-    distanceKm: number;
-    modeId: string | null;
-    modeName: string | null;
-    vehicleCount: number;
-    stopCount: number;
+  id: string;
+  code: string;
+  name: string;
+  type: string;
+  origin: string;
+  destination: string;
+  distanceKm: number;
+  modeId: string | null;
+  modeName: string | null;
+  vehicleCount: number;
+  stopCount: number;
 };
 
-const modeIcons = {
-    bus: Bus,
-    "train-front": TrainFront,
-    "tram-front": TramFront,
-    school: School,
+const iconBySlug = {
+  transjakarta: Bus,
+  "mrt-jakarta": TramFront,
+  "lrt-jabodebek": Train,
+  "feeder-bus": School,
+};
+
+const taglines: Record<string, string> = {
+  transjakarta: "Bus Rapid Transit",
+  "mrt-jakarta": "Urban rail",
+  "lrt-jabodebek": "Light rail",
+  "feeder-bus": "First and last mile",
 };
 
 export function PassengerDashboardClient({
-    modes,
-    routes,
+  modes,
+  routes,
 }: {
-    modes: Mode[];
-    routes: PassengerRoute[];
+  modes: Mode[];
+  routes: PassengerRoute[];
 }) {
-    const [selectedModeId, setSelectedModeId] = useState<string | null>(null);
-    const [query, setQuery] = useState("");
+  const router = useRouter();
+  const [selectedModeId, setSelectedModeId] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
-    const visibleRoutes = useMemo(() => {
-        if (!selectedModeId) return [];
+  const selectedMode = modes.find((mode) => mode.id === selectedModeId) ?? null;
+  const visibleRoutes = useMemo(() => {
+    if (!selectedModeId) return [];
 
-        const normalizedQuery = query.trim().toLowerCase();
+    const needle = query.trim().toLowerCase();
+    return routes
+      .filter((route) => route.modeId === selectedModeId)
+      .filter((route) => {
+        if (!needle) return true;
+        return [route.code, route.name, route.origin, route.destination].some((value) =>
+          value.toLowerCase().includes(needle),
+        );
+      });
+  }, [query, routes, selectedModeId]);
 
-        return routes
-            .filter((route) => route.modeId === selectedModeId)
-            .filter((route) => {
-                if (!normalizedQuery) return true;
+  return (
+    <section className="space-y-5">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-widest text-[#757780]">
+          Browse by transport mode
+        </p>
+        <h2 className="mt-2 text-[22px] font-semibold leading-tight text-[#001011] dark:text-[#FFFFFC]">
+          Track one route at a time
+        </h2>
+      </div>
 
-                return [
-                    route.code,
-                    route.name,
-                    route.origin,
-                    route.destination,
-                    route.modeName ?? "",
-                ].some((value) => value.toLowerCase().includes(normalizedQuery));
-            });
-    }, [routes, selectedModeId, query]);
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {modes.map((mode) => {
+          const Icon = iconBySlug[mode.slug as keyof typeof iconBySlug] ?? Bus;
 
-    const selectedMode = modes.find((mode) => mode.id === selectedModeId) ?? null;
+          return (
+            <ModeCard
+              key={mode.id}
+              mode={{
+                name: mode.name,
+                tagline: taglines[mode.slug] ?? mode.description ?? "Public transport",
+                icon: Icon,
+              }}
+              liveCount={mode.liveUnitCount}
+              isSelected={selectedModeId === mode.id}
+              onClick={() => {
+                setSelectedModeId(mode.id);
+                setQuery("");
+              }}
+            />
+          );
+        })}
+      </div>
 
-    return (
-        <div className="space-y-6">
-            <section>
-                <div className="mb-3">
-                    <p className="text-sm font-medium text-cyan-600 dark:text-cyan-300">
-                        Or track a route
-                    </p>
-                    <h2 className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold tracking-tight">
-                        Choose your transport mode first
-                    </h2>
-                </div>
+      {selectedMode ? (
+        <div className="animate-slide-in space-y-4 rounded-3xl border border-black/10 bg-white p-4 dark:border-white/[0.07] dark:bg-[#0a1a1c]">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-base font-semibold text-[#001011] dark:text-[#FFFFFC]">
+                {selectedMode.name} routes
+              </p>
+              <p className="text-sm text-[#757780]">Search by code, name, or destination.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedModeId(null);
+                setQuery("");
+              }}
+              className="min-h-11 rounded-xl border border-[#6CCFF6] px-4 text-sm font-semibold text-[#6CCFF6] sm:self-start"
+            >
+              Change mode
+            </button>
+          </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                {modes.map((mode) => {
-                    const Icon =
-                        modeIcons[mode.icon as keyof typeof modeIcons] ?? Bus;
-                    const selected = selectedModeId === mode.id;
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            placeholder="Search route by name, code, or destination..."
+          />
 
-                    return (
-                        <button
-                            key={mode.id}
-                            onClick={() => setSelectedModeId(selected ? null : mode.id)}
-                            className={`min-h-40 rounded-2xl border p-5 text-left transition ${selected
-                                ? "border-cyan-300 bg-cyan-50 dark:border-cyan-400/30 dark:bg-cyan-400/10"
-                                : "border-slate-200 bg-white hover:border-cyan-200 hover:bg-slate-50 dark:border-white/10 dark:bg-slate-950 dark:hover:border-cyan-400/30 dark:hover:bg-white/5"
-                                }`}
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white text-cyan-700 dark:border-white/10 dark:bg-white/5 dark:text-cyan-300">
-                                    <Icon className="h-5 w-5" />
-                                </div>
-                                <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
-                                    {mode.routeCount} route
-                                </span>
-                            </div>
-                            <h2 className="mt-4 font-[var(--font-jakarta)] text-lg font-semibold text-slate-950 dark:text-white">
-                                {mode.name}
-                            </h2>
-                            <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                                {mode.description}
-                            </p>
-                            <div className="mt-4 rounded-xl bg-slate-50 px-3 py-2 dark:bg-white/5">
-                                <p className="text-xs text-slate-500 dark:text-slate-400">
-                                    Live units
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
-                                    {mode.liveUnitCount} live units
-                                </p>
-                            </div>
-                        </button>
-                    );
-                })}
-                </div>
-            </section>
+          <div className="space-y-3">
+            {visibleRoutes.map((route) => (
+              <RouteCard
+                key={route.id}
+                route={route}
+                buttonLabel="Track"
+                onTrack={() => router.push(`/passenger/routes/${route.id}`)}
+              />
+            ))}
+          </div>
 
-            <section>
-                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-cyan-600 dark:text-cyan-300">
-                            Route tracking
-                        </p>
-                        <h2 className="mt-1 font-[var(--font-jakarta)] text-2xl font-semibold tracking-tight">
-                            {selectedMode ? `${selectedMode.name} routes` : "Select a mode to see routes"}
-                        </h2>
-                        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                            Pick one mode first so you only see relevant routes.
-                        </p>
-                    </div>
-
-                    {selectedModeId ? (
-                        <Button
-                            variant="outline"
-                            className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
-                            onClick={() => {
-                                setSelectedModeId(null);
-                                setQuery("");
-                            }}
-                        >
-                            Change mode
-                        </Button>
-                    ) : null}
-                </div>
-
-                {selectedModeId ? (
-                    <label className="mb-4 flex h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 text-sm dark:border-white/10 dark:bg-slate-950">
-                        <Search className="h-4 w-4 text-slate-400" />
-                        <input
-                            value={query}
-                            onChange={(event) => setQuery(event.target.value)}
-                            placeholder="Search corridor, stop, or destination"
-                            className="h-full min-w-0 flex-1 bg-transparent text-slate-950 outline-none placeholder:text-slate-400 dark:text-white"
-                        />
-                    </label>
-                ) : null}
-
-                <div className="grid gap-4 lg:grid-cols-2">
-                    {visibleRoutes.map((route) => (
-                        <Card
-                            key={route.id}
-                            className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950"
-                        >
-                            <CardContent className="p-5">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <StatusBadge status={route.type} />
-                                            <span className="text-xs text-slate-500 dark:text-slate-400">
-                                                {route.code} · {route.modeName}
-                                            </span>
-                                        </div>
-                                        <h3 className="mt-3 font-[var(--font-jakarta)] text-xl font-semibold">
-                                            {route.name}
-                                        </h3>
-                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                            {route.origin} → {route.destination}
-                                        </p>
-                                    </div>
-                                    <Route className="h-5 w-5 text-slate-400" />
-                                </div>
-
-                                <div className="mt-5 grid grid-cols-3 gap-3">
-                                    <Metric label="Vehicles" value={route.vehicleCount} />
-                                    <Metric label="Stops" value={route.stopCount} />
-                                    <Metric label="Distance" value={`${route.distanceKm.toFixed(1)} km`} />
-                                </div>
-
-                                <Button
-                                    asChild
-                                    className="mt-5 w-full rounded-xl bg-slate-950 text-white shadow-none hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-                                >
-                                    <Link href={`/passenger/routes/${route.id}`}>
-                                        Track route
-                                        <ChevronRight className="ml-2 h-4 w-4" />
-                                    </Link>
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-
-                {!selectedModeId ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400">
-                        Select TransJakarta, MRT, LRT, or Feeder to show route choices.
-                    </div>
-                ) : visibleRoutes.length === 0 ? (
-                    <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400">
-                        No route matches your search for this mode.
-                    </div>
-                ) : null}
-            </section>
+          {visibleRoutes.length === 0 ? (
+            <div className="rounded-2xl border border-black/10 p-6 text-center text-sm text-[#757780] dark:border-white/[0.07]">
+              No route matches this search.
+            </div>
+          ) : null}
         </div>
-    );
-}
-
-function Metric({ label, value }: { label: string; value: string | number }) {
-    return (
-        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-            <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
-            <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
-                {value}
-            </p>
+      ) : (
+        <div className="rounded-2xl border border-black/10 bg-white p-5 text-sm text-[#757780] dark:border-white/[0.07] dark:bg-[#0a1a1c]">
+          Select TransJakarta, MRT, LRT, or Feeder to show matching routes.
         </div>
-    );
+      )}
+    </section>
+  );
 }

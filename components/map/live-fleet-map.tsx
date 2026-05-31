@@ -21,16 +21,30 @@ type LiveFleetMapProps = {
     markers: FleetMarker[];
 };
 
-const vehicleIcon = new L.Icon({
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-});
+function makeVehicleIcon(type: string) {
+    const normalized = type.toUpperCase();
+    const emoji =
+        normalized === "MRT" ? "🚇" : normalized === "LRT" ? "🚈" : normalized === "FEEDER" ? "🚐" : "🚌";
+
+    return L.divIcon({
+        className: "",
+        html: `<div style="
+            width:36px;height:36px;
+            background:#001011;
+            border:2.5px solid #6CCFF6;
+            border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            font-size:16px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.25);
+        ">${emoji}</div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+    });
+}
 
 export function LiveFleetMap({ markers }: LiveFleetMapProps) {
     return (
-        <div className="h-[520px] overflow-hidden rounded-2xl border border-slate-200 dark:border-white/10">
+        <div className="h-[520px] overflow-hidden rounded-2xl border border-gray-100 dark:border-white/[0.07]">
             <MapContainer
                 center={[JAKARTA_CENTER.lat, JAKARTA_CENTER.lng]}
                 zoom={DEFAULT_MAP_ZOOM}
@@ -38,25 +52,27 @@ export function LiveFleetMap({ markers }: LiveFleetMapProps) {
                 className="h-full w-full"
             >
                 <TileLayer
-                    attribution="&copy; OpenStreetMap contributors"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    subdomains={["a", "b", "c", "d"]}
+                    maxZoom={19}
                 />
 
                 {markers.map((marker) => (
                     <Marker
                         key={marker.id}
                         position={[marker.latitude, marker.longitude]}
-                        icon={vehicleIcon}
+                        icon={makeVehicleIcon(marker.type)}
                     >
                         <Popup>
                             <div className="min-w-48 space-y-2">
                                 <p className="font-semibold">{marker.code}</p>
-                                <p className="text-xs text-slate-600">{marker.routeName}</p>
+                                <p className="text-xs text-[#757780]">{marker.routeName}</p>
                                 <div className="flex gap-2">
                                     <StatusBadge status={marker.status} />
                                     <StatusBadge status={marker.type} />
                                 </div>
-                                <p className="text-xs text-slate-600">
+                                <p className="text-xs text-[#757780]">
                                     Speed: {marker.speedKmh} km/h
                                 </p>
                             </div>

@@ -30,7 +30,7 @@ const PassengerLiveMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="flex h-[520px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400">
+            <div className="flex h-[520px] items-center justify-center rounded-2xl border border-gray-100 bg-white text-sm text-[#757780] dark:border-white/[0.07] dark:bg-[#0d1f22] text-[#757780]">
                 Loading live map...
             </div>
         ),

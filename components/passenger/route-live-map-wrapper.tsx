@@ -18,7 +18,7 @@ const RouteLiveMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="flex h-[460px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm text-slate-500 dark:border-white/10 dark:bg-slate-950 dark:text-slate-400 md:h-[560px]">
+            <div className="flex h-[45vh] max-h-[350px] min-h-[320px] items-center justify-center rounded-2xl bg-white text-sm text-[#757780] dark:bg-[#0a1a1c] md:h-full md:max-h-none md:min-h-0">
                 Loading route map...
             </div>
         ),

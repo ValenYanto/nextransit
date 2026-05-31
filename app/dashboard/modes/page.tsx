@@ -80,22 +80,22 @@ export default async function ModesPage() {
                 <MetricCard title="Service Scope" value="Integrated" description="DISHUB Case 2 mobility network" icon={Bus} />
             </div>
 
-            <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="mt-6 rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                         Add or update mode
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         Manage the service families used by passenger routing and operator
                         reporting.
                     </p>
-                    <form action={createMode} className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-                        <input name="name" required placeholder="Mode name" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="slug" required placeholder="Slug" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="description" placeholder="Description" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900 xl:col-span-2" />
-                        <input name="icon" placeholder="Icon key" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="color" placeholder="#0891b2" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <Button className="h-10 rounded-xl bg-slate-950 text-white shadow-none dark:bg-white dark:text-slate-950 md:col-span-2 xl:col-span-4">
+                    <form action={createMode} className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                        <input name="name" required placeholder="Mode name" className="h-11 rounded-xl border border-gray-200 bg-[#f9fafb] px-4 text-sm text-[#001011] outline-none placeholder:text-[#757780] focus:border-[#6CCFF6] focus:ring-2 focus:ring-[#6CCFF6]/20 dark:border-white/[0.08] dark:bg-[#001011] dark:text-[#FFFFFC]" />
+                        <input name="slug" required placeholder="Slug" className="h-11 rounded-xl border border-gray-200 bg-[#f9fafb] px-4 text-sm text-[#001011] outline-none placeholder:text-[#757780] focus:border-[#6CCFF6] focus:ring-2 focus:ring-[#6CCFF6]/20 dark:border-white/[0.08] dark:bg-[#001011] dark:text-[#FFFFFC]" />
+                        <input name="description" placeholder="Description" className="h-11 rounded-xl border border-gray-200 bg-[#f9fafb] px-4 text-sm text-[#001011] outline-none placeholder:text-[#757780] focus:border-[#6CCFF6] focus:ring-2 focus:ring-[#6CCFF6]/20 dark:border-white/[0.08] dark:bg-[#001011] dark:text-[#FFFFFC] xl:col-span-2" />
+                        <input name="icon" placeholder="Icon key" className="h-11 rounded-xl border border-gray-200 bg-[#f9fafb] px-4 text-sm text-[#001011] outline-none placeholder:text-[#757780] focus:border-[#6CCFF6] focus:ring-2 focus:ring-[#6CCFF6]/20 dark:border-white/[0.08] dark:bg-[#001011] dark:text-[#FFFFFC]" />
+                        <input name="color" placeholder="#6CCFF6" className="h-11 rounded-xl border border-gray-200 bg-[#f9fafb] px-4 font-mono text-sm text-[#001011] outline-none placeholder:text-[#757780] focus:border-[#6CCFF6] focus:ring-2 focus:ring-[#6CCFF6]/20 dark:border-white/[0.08] dark:bg-[#001011] dark:text-[#FFFFFC]" />
+                        <Button className="h-11 rounded-xl bg-[#6CCFF6] font-semibold text-[#001011] shadow-none md:col-span-2 xl:col-span-4">
                             Save mode
                         </Button>
                     </form>
@@ -106,22 +106,22 @@ export default async function ModesPage() {
                 {modes.map((mode) => (
                     <Card
                         key={mode.id}
-                        className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950"
+                        className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]"
                     >
                         <CardContent className="p-5">
                             <div className="flex items-start justify-between gap-4">
                                 <div>
-                                    <p className="text-sm font-medium text-cyan-600 dark:text-cyan-300">
+                                    <p className="inline-flex rounded-full bg-[#6CCFF6]/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-[#6CCFF6]">
                                         {mode.slug}
                                     </p>
-                                    <h2 className="mt-2 font-[var(--font-jakarta)] text-xl font-semibold">
+                                    <h2 className="mt-3 text-lg font-semibold text-[#001011] dark:text-[#FFFFFC]">
                                         {mode.name}
                                     </h2>
-                                    <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                    <p className="mt-2 text-sm leading-6 text-[#757780]">
                                         {mode.description ?? "No description available."}
                                     </p>
                                 </div>
-                                <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                <span className="rounded-full px-2.5 py-0.5 text-xs text-[#757780]">
                                     {mode._count.routes} routes
                                 </span>
                             </div>

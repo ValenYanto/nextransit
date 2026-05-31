@@ -57,7 +57,7 @@ export default function CaseAlignmentPage() {
             <StatusSection title="Required AI Capabilities" items={aiCapabilities} />
             <StatusSection title="Expected Output" items={outputs} />
 
-            <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="mt-6 rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <div className="flex items-start gap-3">
                         <Layers3 className="mt-1 h-5 w-5 text-cyan-600 dark:text-cyan-300" />
@@ -67,7 +67,7 @@ export default function CaseAlignmentPage() {
                             </h2>
                             <div className="mt-4 grid gap-3 md:grid-cols-2">
                                 {remaining.map((item) => (
-                                    <div key={item} className="rounded-xl border border-slate-200 p-3 text-sm text-slate-600 dark:border-white/10 dark:text-slate-300">
+                                    <div key={item} className="rounded-xl border border-gray-100 p-3 text-sm text-[#757780] dark:border-white/[0.07] dark:text-[#FFFFFC]">
                                         {item}
                                     </div>
                                 ))}
@@ -88,17 +88,17 @@ function StatusSection({
     items: string[][];
 }) {
     return (
-        <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+        <Card className="mt-6 rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
             <CardContent className="p-5">
                 <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">{title}</h2>
                 <div className="mt-4 space-y-3">
                     {items.map(([problem, solution, status]) => (
                         <div
                             key={`${title}-${problem}`}
-                            className="grid gap-3 rounded-xl border border-slate-200 p-4 dark:border-white/10 lg:grid-cols-[0.8fr_1fr_auto] lg:items-center"
+                            className="grid gap-3 rounded-xl border border-gray-100 p-4 dark:border-white/[0.07] lg:grid-cols-[0.8fr_1fr_auto] lg:items-center"
                         >
-                            <p className="text-sm font-medium text-slate-950 dark:text-white">{problem}</p>
-                            <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">{solution}</p>
+                            <p className="text-sm font-medium text-[#001011] dark:text-[#FFFFFC]">{problem}</p>
+                            <p className="text-sm leading-6 text-[#757780]">{solution}</p>
                             <StatusBadge status={status} />
                         </div>
                     ))}

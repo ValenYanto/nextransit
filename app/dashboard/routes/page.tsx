@@ -133,22 +133,22 @@ export default async function RoutesPage() {
                 />
             </div>
 
-            <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="mt-6 rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                         Add or update route
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         Create a corridor/line, then manage its stop order in Schedules and
                         rebuild road geometry in Path Builder.
                     </p>
-                    <details className="mt-5 rounded-2xl border border-slate-200 p-4 dark:border-white/10">
+                    <details className="mt-5 rounded-2xl border border-gray-100 p-4 dark:border-white/[0.07]">
                         <summary className="cursor-pointer text-sm font-medium">
                             Add new route
                         </summary>
                     <form action={createRoute} className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                         <Field label="Mode">
-                            <select name="modeId" required className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900">
+                            <select name="modeId" required className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]">
                                 <option value="">Choose mode</option>
                                 {modes.map((mode) => (
                                     <option key={mode.id} value={mode.id}>{mode.name}</option>
@@ -156,13 +156,13 @@ export default async function RoutesPage() {
                             </select>
                         </Field>
                         <Field label="Route code">
-                            <input name="code" required placeholder="K9" className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
+                            <input name="code" required placeholder="K9" className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
                         </Field>
                         <Field label="Route name">
-                            <input name="name" required placeholder="Route name" className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
+                            <input name="name" required placeholder="Route name" className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
                         </Field>
                         <Field label="Type">
-                            <select name="type" required className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900">
+                            <select name="type" required className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]">
                                 <option value="BUS">BUS</option>
                                 <option value="MRT">MRT</option>
                                 <option value="LRT">LRT</option>
@@ -170,15 +170,15 @@ export default async function RoutesPage() {
                             </select>
                         </Field>
                         <Field label="Origin">
-                            <input name="origin" required placeholder="Origin" className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
+                            <input name="origin" required placeholder="Origin" className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
                         </Field>
                         <Field label="Destination">
-                            <input name="destination" required placeholder="Destination" className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
+                            <input name="destination" required placeholder="Destination" className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
                         </Field>
                         <Field label="Distance">
-                            <input name="distanceKm" required type="number" step="0.1" min="0.1" placeholder="12.9" className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
+                            <input name="distanceKm" required type="number" step="0.1" min="0.1" placeholder="12.9" className="h-10 w-full rounded-xl border border-gray-100 bg-white px-3 text-sm dark:border-white/[0.07] dark:bg-[#001011]" />
                         </Field>
-                        <Button className="mt-6 h-10 rounded-xl bg-slate-950 text-white shadow-none dark:bg-white dark:text-slate-950">
+                        <Button className="mt-6 h-10 rounded-xl bg-[#6CCFF6] text-[#001011] shadow-none">
                             Save route
                         </Button>
                     </form>
@@ -190,7 +190,7 @@ export default async function RoutesPage() {
                 {routes.map((route) => (
                     <Card
                         key={route.id}
-                        className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950"
+                        className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]"
                     >
                         <CardContent className="p-5">
                             <div className="flex items-start justify-between gap-4">
@@ -199,7 +199,7 @@ export default async function RoutesPage() {
                                         <StatusBadge status={route.type} />
                                         {route.mode ? <StatusBadge status={route.mode.name} /> : null}
                                         {!route.isActive ? <StatusBadge status="INACTIVE" /> : null}
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                                        <span className="text-xs text-[#757780]">
                                             {route.code}
                                         </span>
                                     </div>
@@ -208,7 +208,7 @@ export default async function RoutesPage() {
                                         {route.name}
                                     </h2>
 
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    <p className="mt-1 text-sm text-[#757780]">
                                         {route.origin} → {route.destination}
                                     </p>
                                 </div>
@@ -217,7 +217,7 @@ export default async function RoutesPage() {
                                     <p className="font-[var(--font-jakarta)] text-2xl font-semibold">
                                         {route.distanceKm.toFixed(1)}
                                     </p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    <p className="text-xs text-[#757780]">
                                         km
                                     </p>
                                 </div>
@@ -231,33 +231,33 @@ export default async function RoutesPage() {
                             ) : null}
 
                             <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-3">
-                                <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Fleet
                                     </p>
                                     <p className="mt-1 font-semibold">{route.vehicles.length}</p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Stops
                                     </p>
                                     <p className="mt-1 font-semibold">{route.schedules.length}</p>
                                 </div>
-                                <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Path points
                                     </p>
                                     <p className="mt-1 font-semibold">{route.pathPointCount || route.pathPoints.length}</p>
                                 </div>
-                                <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Path source
                                     </p>
                                     <p className="mt-1 font-semibold">{route.pathSource ?? "UNKNOWN"}</p>
                                 </div>
-                                <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                    <p className="text-xs text-[#757780]">
                                         Status
                                     </p>
                                     <p className="mt-1 font-semibold">{route.isActive ? "Active" : "Inactive"}</p>
@@ -266,21 +266,21 @@ export default async function RoutesPage() {
 
                             <div className="mt-5 flex flex-wrap gap-2">
                                 {route.isActive && route.mode && route.schedules.length > 0 && (route.pathPointCount || route.pathPoints.length) > 1 ? (
-                                    <Button asChild variant="outline" className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent">
+                                    <Button asChild variant="outline" className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent">
                                         <Link href={`/passenger/routes/${route.id}`}>
                                             <ExternalLink className="mr-2 h-4 w-4" />
                                             View live
                                         </Link>
                                     </Button>
                                 ) : (
-                                    <Button disabled variant="outline" className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent">
+                                    <Button disabled variant="outline" className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent">
                                         View live unavailable
                                     </Button>
                                 )}
-                                <Button asChild variant="outline" className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent">
+                                <Button asChild variant="outline" className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent">
                                     <Link href={`/dashboard/path-builder?routeId=${route.id}`}>Rebuild path</Link>
                                 </Button>
-                                <Button asChild variant="outline" className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent">
+                                <Button asChild variant="outline" className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent">
                                     <Link href={`/dashboard/schedules?routeId=${route.id}`}>Manage stops</Link>
                                 </Button>
                             </div>
@@ -289,16 +289,16 @@ export default async function RoutesPage() {
                                 {route.schedules.map((schedule) => (
                                     <div
                                         key={schedule.id}
-                                        className="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2 dark:border-white/10"
+                                        className="flex items-center justify-between rounded-xl border border-gray-100 px-3 py-2 dark:border-white/[0.07]"
                                     >
                                         <div>
                                             <p className="text-sm font-medium">{schedule.stop.name}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            <p className="text-xs text-[#757780]">
                                                 Stop #{schedule.sequence}
                                             </p>
                                         </div>
 
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="text-sm text-[#757780]">
                                             {schedule.arrivalTime}
                                         </p>
                                     </div>
@@ -321,7 +321,7 @@ function Field({
 }) {
     return (
         <label className="space-y-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-medium uppercase tracking-wide text-[#757780]">
                 {label}
             </span>
             {children}

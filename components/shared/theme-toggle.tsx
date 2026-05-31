@@ -23,7 +23,7 @@ export function ThemeToggle() {
             <Button
                 variant="outline"
                 size="icon"
-                className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
+                className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent"
                 disabled
             >
                 <Sun className="h-4 w-4" />
@@ -37,7 +37,7 @@ export function ThemeToggle() {
         <Button
             variant="outline"
             size="icon"
-            className="rounded-xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-transparent"
+            className="rounded-xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-transparent"
             onClick={() => setTheme(isDark ? "light" : "dark")}
             aria-label="Toggle theme"
         >

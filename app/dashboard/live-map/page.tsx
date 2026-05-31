@@ -97,12 +97,12 @@ export default async function LiveMapPage() {
             <div className="mt-6 grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
                 <LiveFleetMapWrapper markers={markers} />
 
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                     <CardContent className="p-5">
                         <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                             Fleet status
                         </h2>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-sm text-[#757780]">
                             Latest position data from registered vehicles.
                         </p>
 
@@ -110,12 +110,12 @@ export default async function LiveMapPage() {
                             {markers.map((marker) => (
                                 <div
                                     key={marker.id}
-                                    className="rounded-xl border border-slate-200 p-4 dark:border-white/10"
+                                    className="rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
                                             <p className="font-medium">{marker.code}</p>
-                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            <p className="mt-1 text-sm text-[#757780]">
                                                 {marker.routeName}
                                             </p>
                                         </div>
@@ -125,7 +125,7 @@ export default async function LiveMapPage() {
 
                                     <div className="mt-3 flex flex-wrap gap-2">
                                         <StatusBadge status={marker.type} />
-                                        <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                        <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                             {marker.speedKmh} km/h
                                         </span>
                                     </div>
@@ -133,7 +133,7 @@ export default async function LiveMapPage() {
                             ))}
 
                             {markers.length === 0 ? (
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                <p className="text-sm text-[#757780]">
                                     No fleet position available.
                                 </p>
                             ) : null}

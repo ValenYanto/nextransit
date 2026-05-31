@@ -9,21 +9,21 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
     const className =
         normalized === "ACTIVE" || normalized === "LOW"
-            ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300"
+            ? "border-[#10B981]/40 bg-[#10B981]/15 text-[#10B981] dark:border-[#10B981]/30 dark:bg-[#10B981]/10 dark:text-[#10B981]"
             : normalized === "DELAYED" ||
                 normalized === "MEDIUM" ||
                 normalized === "FEEDER"
-                ? "border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-400/20 dark:bg-cyan-400/10 dark:text-cyan-300"
+                ? "border-[#6CCFF6]/40 bg-[#6CCFF6]/15 text-[#006989] dark:border-[#6CCFF6]/30 dark:bg-[#6CCFF6]/10 dark:text-[#6CCFF6]"
                 : normalized === "HIGH" ||
-                    normalized === "BUS" ||
-                    normalized === "MRT" ||
-                    normalized === "LRT"
-                    ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-300"
+                normalized === "BUS" ||
+                normalized === "MRT" ||
+                normalized === "LRT"
+                    ? "border-[#6CCFF6]/40 bg-[#6CCFF6]/10 text-[#006989] dark:border-[#6CCFF6]/30 dark:bg-[#6CCFF6]/10 dark:text-[#6CCFF6]"
                     : normalized === "CRITICAL" ||
                         normalized === "MAINTENANCE" ||
                         normalized === "OFFLINE"
-                        ? "border-red-200 bg-red-50 text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300"
-                        : "border-slate-200 bg-slate-50 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300";
+                        ? "border-[#757780]/40 bg-[#757780]/10 text-[#757780] dark:border-[#757780]/40 dark:bg-[#757780]/10 dark:text-[#757780]"
+                        : "border-black/10 bg-[#FFFFFC] text-[#757780] dark:border-white/[0.07] dark:bg-white/5 dark:text-[#757780]";
 
     return (
         <Badge variant="outline" className={`rounded-full px-2.5 py-0.5 ${className}`}>

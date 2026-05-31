@@ -83,12 +83,12 @@ export function SimulatorPanel() {
 
     return (
         <div className="grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
-            <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                         Scenario
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         Pilih kondisi operasional untuk melihat dampaknya ke ETA dan kepadatan.
                     </p>
 
@@ -102,11 +102,11 @@ export function SimulatorPanel() {
                                     onClick={() => runSimulation(scenario.id)}
                                     className={`w-full rounded-xl border p-4 text-left transition ${isActive
                                             ? "border-cyan-300 bg-cyan-50 dark:border-cyan-400/30 dark:bg-cyan-400/10"
-                                            : "border-slate-200 bg-white hover:bg-slate-50 dark:border-white/10 dark:bg-transparent dark:hover:bg-white/5"
+                                            : "border-gray-100 bg-white hover:bg-[#f9fafb] dark:border-white/[0.07] dark:bg-transparent dark:hover:bg-white/5"
                                         }`}
                                 >
                                     <p className="font-medium">{scenario.title}</p>
-                                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                    <p className="mt-1 text-sm text-[#757780]">
                                         {scenario.description}
                                     </p>
                                 </button>
@@ -116,14 +116,14 @@ export function SimulatorPanel() {
                 </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+            <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                 <CardContent className="p-5">
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                                 Simulation result
                             </h2>
-                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            <p className="mt-1 text-sm text-[#757780]">
                                 Output estimasi untuk kebutuhan armada dan kondisi perjalanan.
                             </p>
                         </div>
@@ -134,9 +134,9 @@ export function SimulatorPanel() {
                     {result ? (
                         <div className="mt-5">
                             <div className="grid gap-3 md:grid-cols-4">
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <Timer className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <Timer className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         ETA
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-xl font-semibold">
@@ -144,9 +144,9 @@ export function SimulatorPanel() {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <UsersRound className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <UsersRound className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Passenger
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-xl font-semibold">
@@ -154,9 +154,9 @@ export function SimulatorPanel() {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <CloudRain className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <CloudRain className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Speed
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-xl font-semibold">
@@ -164,9 +164,9 @@ export function SimulatorPanel() {
                                     </p>
                                 </div>
 
-                                <div className="rounded-xl bg-slate-50 p-4 dark:bg-white/5">
-                                    <PartyPopper className="h-4 w-4 text-slate-400" />
-                                    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                                <div className="rounded-xl bg-[#f9fafb] p-4 dark:bg-white/5">
+                                    <PartyPopper className="h-4 w-4 text-[#757780]" />
+                                    <p className="mt-3 text-xs text-[#757780]">
                                         Extra Fleet
                                     </p>
                                     <p className="mt-1 font-[var(--font-jakarta)] text-xl font-semibold">
@@ -181,22 +181,22 @@ export function SimulatorPanel() {
                                 <StatusBadge status={result.scenario} />
                             </div>
 
-                            <div className="mt-5 rounded-xl border border-slate-200 p-4 dark:border-white/10">
+                            <div className="mt-5 rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]">
                                 <p className="text-sm font-medium">Summary</p>
-                                <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                <p className="mt-1 text-sm leading-6 text-[#757780]">
                                     {result.summary}
                                 </p>
                             </div>
 
-                            <div className="mt-3 rounded-xl border border-slate-200 p-4 dark:border-white/10">
+                            <div className="mt-3 rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]">
                                 <p className="text-sm font-medium">Recommendation</p>
-                                <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                                <p className="mt-1 text-sm leading-6 text-[#757780]">
                                     {result.recommendation}
                                 </p>
                             </div>
                         </div>
                     ) : (
-                        <div className="mt-5 rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+                        <div className="mt-5 rounded-xl border border-dashed border-gray-100 p-8 text-center text-sm text-[#757780] dark:border-white/[0.07] text-[#757780]">
                             Pilih skenario untuk menjalankan simulasi.
                         </div>
                     )}

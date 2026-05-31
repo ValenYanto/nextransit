@@ -1,14 +1,11 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { MapPin, Route, Waypoints } from "lucide-react";
+import { MapPin, Pencil, Route, Trash2, Waypoints } from "lucide-react";
+import type { ComponentType } from "react";
 
 import { prisma } from "@/lib/prisma";
 import type { StopType } from "@/lib/generated/prisma/enums";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MetricCard } from "@/components/shared/metric-card";
-import { PageHeading } from "@/components/shared/page-heading";
-import { StatusBadge } from "@/components/shared/status-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -74,97 +71,160 @@ export default async function StopsPage() {
     const busStopCount = stops.filter((stop) => stop.type !== "STATION").length;
 
     return (
-        <div>
-            <PageHeading
-                label="Stops"
-                title="Stops and stations"
-                description="Admin-ready list of stop coordinates, service types, and connected routes for ETA and transfer planning."
-            />
-
-            <div className="grid gap-4 md:grid-cols-3">
-                <MetricCard title="Total Stops" value={stops.length} description="Registered stop points" icon={MapPin} />
-                <MetricCard title="Stations" value={stationCount} description="Rail or terminal facilities" icon={Waypoints} />
-                <MetricCard title="Bus Points" value={busStopCount} description="Bus stops and terminals" icon={Route} />
+        <div className="space-y-6">
+            <div>
+                <p className="text-sm text-[#757780]">Stops</p>
+                <h1 className="mt-1 text-3xl font-semibold">Stops and stations</h1>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-[#757780]">
+                    Manage readable stop names, service types, route coverage, and map coordinates.
+                </p>
             </div>
 
-            <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                <CardContent className="p-5">
-                    <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
+            <div className="grid gap-4 md:grid-cols-3">
+                <StopStat title="Total Stops" value={stops.length} icon={MapPin} />
+                <StopStat title="Stations" value={stationCount} icon={Waypoints} />
+                <StopStat title="Bus Stops & Terminals" value={busStopCount} icon={Route} />
+            </div>
+
+            <section className="rounded-2xl border border-[#e5e7eb] bg-white p-5 dark:border-[#1a2f32] dark:bg-[#0d1f22]">
+                    <h2 className="text-lg font-semibold">
                         Add or update stop/station
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm text-[#757780]">
                         Prefer adding stops from Path Builder by clicking the map. Use this
                         manual form only for advanced coordinate fixes.
                     </p>
-                    <details className="mt-5 rounded-2xl border border-slate-200 p-4 dark:border-white/10">
+                    <details className="mt-5 rounded-2xl border border-[#e5e7eb] bg-[#FFFFFC] p-4 dark:border-[#1a2f32] dark:bg-[#001011]">
                         <summary className="cursor-pointer text-sm font-medium">
                             Advanced: add stop with coordinates
                         </summary>
-                    <form action={createStop} className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
-                        <input name="code" required placeholder="Code" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="name" required placeholder="Name" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <select name="type" required className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900">
+                    <form action={createStop} className="mt-5 grid gap-3 md:grid-cols-2">
+                        <input name="name" required placeholder="Stop name" className="h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm dark:border-[#1a2f32] dark:bg-[#0d1f22]" />
+                        <input name="code" required placeholder="Stop code" className="h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm dark:border-[#1a2f32] dark:bg-[#0d1f22]" />
+                        <select name="type" required className="h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm dark:border-[#1a2f32] dark:bg-[#0d1f22]">
                             <option value="BUS_STOP">BUS_STOP</option>
                             <option value="STATION">STATION</option>
                             <option value="TERMINAL">TERMINAL</option>
                         </select>
-                        <input name="latitude" required type="number" step="0.000001" placeholder="Latitude" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="longitude" required type="number" step="0.000001" placeholder="Longitude" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <input name="area" placeholder="Area" className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-white/10 dark:bg-slate-900" />
-                        <Button className="h-10 rounded-xl bg-slate-950 text-white shadow-none dark:bg-white dark:text-slate-950 xl:col-span-6">
+                        <input name="area" placeholder="Area" className="h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm dark:border-[#1a2f32] dark:bg-[#0d1f22]" />
+                        <input name="latitude" required type="number" step="0.000001" placeholder="Latitude" className="h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm dark:border-[#1a2f32] dark:bg-[#0d1f22]" />
+                        <input name="longitude" required type="number" step="0.000001" placeholder="Longitude" className="h-11 rounded-xl border border-[#e5e7eb] bg-white px-3 text-sm dark:border-[#1a2f32] dark:bg-[#0d1f22]" />
+                        <Button className="h-11 rounded-xl bg-[#6CCFF6] text-[#001011] shadow-none md:col-span-2">
                             Save stop
                         </Button>
                     </form>
                     </details>
-                </CardContent>
-            </Card>
+            </section>
 
-            <Card className="mt-6 rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
-                <CardContent className="p-0">
+            <section className="overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white dark:border-[#1a2f32] dark:bg-[#0d1f22]">
                     <div className="overflow-x-auto">
                         <table className="w-full text-left text-sm">
-                            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+                            <thead className="border-b border-[#e5e7eb] text-xs uppercase tracking-wider text-[#757780] dark:border-[#1a2f32]">
                                 <tr>
-                                    <th className="px-5 py-3 font-medium">Stop</th>
-                                    <th className="px-5 py-3 font-medium">Type</th>
-                                    <th className="px-5 py-3 font-medium">Area</th>
-                                    <th className="px-5 py-3 font-medium">Routes</th>
-                                    <th className="px-5 py-3 font-medium">Coordinate</th>
+                                    <th className="px-4 py-3 font-medium">Name</th>
+                                    <th className="px-4 py-3 font-medium">Code</th>
+                                    <th className="px-4 py-3 font-medium">Type</th>
+                                    <th className="hidden px-4 py-3 font-medium md:table-cell">Area</th>
+                                    <th className="px-4 py-3 font-medium">Routes</th>
+                                    <th className="hidden px-4 py-3 font-medium lg:table-cell">Coordinates</th>
+                                    <th className="px-4 py-3 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {stops.map((stop) => (
+                                {stops.map((stop) => {
+                                    const routeCodes = Array.from(new Set(stop.schedules.map((schedule) => schedule.route.code)));
+                                    const primaryName = getReadableStopName(stop.name, stop.code);
+
+                                    return (
                                     <tr
                                         key={stop.id}
-                                        className="border-b border-slate-100 last:border-0 dark:border-white/5"
+                                        className="border-b border-[#f3f4f6] hover:bg-[#FFFFFC] last:border-0 dark:border-[#1a2f32] dark:hover:bg-[#0a1a1c]"
                                     >
-                                        <td className="px-5 py-4">
-                                            <p className="font-medium text-slate-950 dark:text-white">
-                                                {stop.name}
+                                        <td className="px-4 py-3">
+                                            <p className={`font-medium ${primaryName.isFallback ? "italic text-[#757780]" : "text-[#001011] dark:text-[#FFFFFC]"}`}>
+                                                {primaryName.value}
                                             </p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <span className="rounded-md bg-[#757780]/10 px-2 py-1 font-mono text-xs text-[#757780]">
                                                 {stop.code}
-                                            </p>
+                                            </span>
                                         </td>
-                                        <td className="px-5 py-4">
-                                            <StatusBadge status={stop.type} />
+                                        <td className="px-4 py-3">
+                                            <StopTypeBadge type={stop.type} />
                                         </td>
-                                        <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
+                                        <td className="hidden px-4 py-3 text-[#757780] md:table-cell">
                                             {stop.area ?? "-"}
                                         </td>
-                                        <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                                            {stop.schedules.map((schedule) => schedule.route.code).join(", ") || "-"}
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-wrap gap-1">
+                                                {routeCodes.length > 0 ? routeCodes.map((code) => (
+                                                    <span key={code} className="rounded-md bg-[#6CCFF6]/10 px-2 py-1 text-xs font-medium text-[#6CCFF6]">
+                                                        {code}
+                                                    </span>
+                                                )) : <span className="text-[#757780]">-</span>}
+                                            </div>
                                         </td>
-                                        <td className="px-5 py-4 text-slate-600 dark:text-slate-300">
-                                            {stop.latitude.toFixed(4)}, {stop.longitude.toFixed(4)}
+                                        <td className="hidden px-4 py-3 font-mono text-xs text-[#757780] lg:table-cell">
+                                            {stop.latitude.toFixed(5)}, {stop.longitude.toFixed(5)}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex gap-1">
+                                                <button type="button" disabled title="Edit coming soon" className="rounded-lg p-2 text-[#757780] opacity-60">
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                                <button type="button" disabled title="Delete coming soon" className="rounded-lg p-2 text-[#757780] opacity-60">
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                );
+                                })}
                             </tbody>
                         </table>
                     </div>
-                </CardContent>
-            </Card>
+            </section>
         </div>
     );
+}
+
+function StopStat({
+    title,
+    value,
+    icon: Icon,
+}: {
+    title: string;
+    value: number;
+    icon: ComponentType<{ className?: string }>;
+}) {
+    return (
+        <article className="rounded-2xl border border-[#e5e7eb] bg-white p-5 dark:border-[#1a2f32] dark:bg-[#0d1f22]">
+            <Icon className="h-5 w-5 text-[#6CCFF6]" />
+            <p className="mt-5 text-[32px] font-bold text-[#001011] dark:text-[#FFFFFC]">{value}</p>
+            <p className="mt-1 text-[13px] text-[#757780]">{title}</p>
+        </article>
+    );
+}
+
+function StopTypeBadge({ type }: { type: string }) {
+    const className =
+        type === "STATION"
+            ? "bg-[#6CCFF6]/15 text-[#6CCFF6]"
+            : type === "TERMINAL"
+                ? "bg-[#10B981]/15 text-[#001011] dark:text-[#10B981]"
+                : "bg-[#757780]/15 text-[#757780]";
+
+    return (
+        <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium ${className}`}>
+            {type}
+        </span>
+    );
+}
+
+function getReadableStopName(name: string, code: string) {
+    const trimmed = name.trim();
+    const looksRaw = trimmed.length <= 3 || /^\d+$/.test(trimmed);
+    if (!trimmed || looksRaw) return { value: code || "Unnamed stop", isFallback: true };
+    return { value: trimmed, isFallback: false };
 }

@@ -68,7 +68,7 @@ export function PathBuilderActions({
                 type="button"
                 onClick={rebuildPath}
                 disabled={isLoading}
-                className="rounded-xl bg-slate-950 text-white shadow-none dark:bg-white dark:text-slate-950"
+                className="rounded-xl bg-[#6CCFF6] text-[#001011] shadow-none"
             >
                 {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -87,7 +87,7 @@ export function PathBuilderActions({
             ) : null}
 
             {report ? (
-                <div className="rounded-xl border border-slate-200 p-3 dark:border-white/10">
+                <div className="rounded-xl border border-gray-100 p-3 dark:border-white/[0.07]">
                     <div className="flex flex-wrap items-center gap-2">
                         <StatusBadge status={report.source} />
                         <span className="text-sm font-medium">
@@ -98,7 +98,7 @@ export function PathBuilderActions({
                         {report.segmentReports.map((segment) => (
                             <div
                                 key={`${segment.from}-${segment.to}`}
-                                className="rounded-lg bg-slate-50 px-3 py-2 text-xs dark:bg-white/5"
+                                className="rounded-lg bg-[#f9fafb] px-3 py-2 text-xs dark:bg-white/5"
                             >
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <span className="font-medium">

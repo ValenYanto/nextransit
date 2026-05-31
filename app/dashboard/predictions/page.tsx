@@ -125,12 +125,12 @@ export default async function PredictionsPage() {
             </div>
 
             <div className="mt-6 grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                     <CardContent className="p-5">
                         <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                             ETA simulations
                         </h2>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-sm text-[#757780]">
                             Estimated arrival time based on distance, speed, traffic, and crowd level.
                         </p>
 
@@ -138,12 +138,12 @@ export default async function PredictionsPage() {
                             {etaSimulations.map((simulation) => (
                                 <div
                                     key={simulation.vehicle.id}
-                                    className="rounded-xl border border-slate-200 p-4 dark:border-white/10"
+                                    className="rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
                                             <p className="font-medium">{simulation.vehicle.code}</p>
-                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            <p className="mt-1 text-sm text-[#757780]">
                                                 {simulation.route?.name ?? "Unassigned route"}
                                             </p>
                                         </div>
@@ -156,10 +156,10 @@ export default async function PredictionsPage() {
                                     <div className="mt-4 flex flex-wrap gap-2">
                                         <StatusBadge status={simulation.trafficLevel} />
                                         <StatusBadge status={simulation.crowdLevel} />
-                                        <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                        <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                             {Math.round(simulation.confidence * 100)}% confidence
                                         </span>
-                                        <span className="rounded-full border border-slate-200 px-2.5 py-0.5 text-xs text-slate-500 dark:border-white/10 dark:text-slate-400">
+                                        <span className="rounded-full border border-gray-100 px-2.5 py-0.5 text-xs text-[#757780] dark:border-white/[0.07] text-[#757780]">
                                             {simulation.speed} km/h
                                         </span>
                                     </div>
@@ -169,12 +169,12 @@ export default async function PredictionsPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-2xl border-slate-200 bg-white shadow-none dark:border-white/10 dark:bg-slate-950">
+                <Card className="rounded-2xl border-gray-100 bg-white shadow-none dark:border-white/[0.07] dark:bg-[#0d1f22]">
                     <CardContent className="p-5">
                         <h2 className="font-[var(--font-jakarta)] text-lg font-semibold">
                             Crowd prediction records
                         </h2>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-sm text-[#757780]">
                             Latest density predictions for stops and stations.
                         </p>
 
@@ -182,12 +182,12 @@ export default async function PredictionsPage() {
                             {predictions.map((prediction) => (
                                 <div
                                     key={prediction.id}
-                                    className="rounded-xl border border-slate-200 p-4 dark:border-white/10"
+                                    className="rounded-xl border border-gray-100 p-4 dark:border-white/[0.07]"
                                 >
                                     <div className="flex items-start justify-between gap-4">
                                         <div>
                                             <p className="font-medium">{prediction.stop.name}</p>
-                                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                            <p className="mt-1 text-sm text-[#757780]">
                                                 {getDensityDescription(prediction.densityLevel)}
                                             </p>
                                         </div>
@@ -196,8 +196,8 @@ export default async function PredictionsPage() {
                                     </div>
 
                                     <div className="mt-4 grid gap-3 md:grid-cols-3">
-                                        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                            <p className="text-xs text-[#757780]">
                                                 Predicted Count
                                             </p>
                                             <p className="mt-1 font-semibold">
@@ -205,8 +205,8 @@ export default async function PredictionsPage() {
                                             </p>
                                         </div>
 
-                                        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                            <p className="text-xs text-[#757780]">
                                                 Confidence
                                             </p>
                                             <p className="mt-1 font-semibold">
@@ -214,8 +214,8 @@ export default async function PredictionsPage() {
                                             </p>
                                         </div>
 
-                                        <div className="rounded-xl bg-slate-50 p-3 dark:bg-white/5">
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        <div className="rounded-xl bg-[#f9fafb] p-3 dark:bg-white/5">
+                                            <p className="text-xs text-[#757780]">
                                                 Action
                                             </p>
                                             <p className="mt-1 text-xs font-medium">
@@ -225,7 +225,7 @@ export default async function PredictionsPage() {
                                     </div>
 
                                     {prediction.reason ? (
-                                        <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="mt-3 text-sm text-[#757780]">
                                             {prediction.reason}
                                         </p>
                                     ) : null}

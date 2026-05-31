@@ -8,17 +8,17 @@ export function PageHeading({ label, title, description }: PageHeadingProps) {
     return (
         <div className="mb-8">
             {label ? (
-                <p className="text-sm font-medium text-cyan-600 dark:text-cyan-300">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[#6CCFF6]">
                     {label}
                 </p>
             ) : null}
 
-            <h1 className="mt-2 font-[var(--font-jakarta)] text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            <h1 className="text-3xl font-bold text-[#001011] dark:text-[#FFFFFC]">
                 {title}
             </h1>
 
             {description ? (
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-[#757780]">
                     {description}
                 </p>
             ) : null}
