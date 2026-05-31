@@ -54,7 +54,6 @@ export async function getRailRoutePath({
             };
         }
 
-        console.warn(`[${routeCode}] OSM rail geometry rejected: ${validation.reason}`);
         return buildCuratedRailResult(routeCode, routeName, stopCoordinates, validation.reason);
     } catch (error) {
         const message = error instanceof Error ? error.message : "Overpass rail query failed.";

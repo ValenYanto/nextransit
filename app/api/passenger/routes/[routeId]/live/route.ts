@@ -219,16 +219,6 @@ export async function GET(
             maxDistanceFromStopsKm: route.type === "MRT" ? 4 : route.type === "LRT" ? 18 : 8,
         });
 
-        if (process.env.NODE_ENV === "development") {
-            console.log("[PASSENGER_ROUTE_LIVE_PATH]", {
-                routeId: route.id,
-                routeCode: route.code,
-                pathPointsLength: pathPoints.length,
-                firstPathPoint: pathPoints[0] ?? null,
-                lastPathPoint: pathPoints[pathPoints.length - 1] ?? null,
-            });
-        }
-
         return NextResponse.json({
             route: {
                 id: route.id,

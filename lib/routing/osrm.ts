@@ -66,7 +66,6 @@ export async function getOsrmRouteSegment({
         };
     } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown OSRM error";
-        console.warn("[OSRM_SEGMENT_FALLBACK]", message);
         return {
             points: interpolateLine(from, to, 14),
             source: "FALLBACK",

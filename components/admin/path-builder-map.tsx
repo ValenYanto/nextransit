@@ -73,14 +73,10 @@ async function fetchOSRMPath(points: Coordinate[]): Promise<Coordinate[]> {
     const data = (await response.json()) as OsrmRouteResponse;
     const osrmCoordinates = data.routes?.[0]?.geometry?.coordinates;
 
-    if (!response.ok || data.code !== "Ok" || !osrmCoordinates?.length) {
-      console.warn("OSRM failed, using straight line fallback");
-      return points;
-    }
+    if (!response.ok || data.code !== "Ok" || !osrmCoordinates?.length) return points;
 
     return osrmCoordinates.map(([longitude, latitude]) => ({ latitude, longitude }));
-  } catch (error) {
-    console.warn("OSRM error, using straight line fallback:", error);
+  } catch {
     return points;
   }
 }
@@ -238,9 +234,9 @@ export function PathBuilderMap({ routes }: { routes: BuilderRoute[] }) {
   }
 
   return (
-    <div className="h-[calc(100vh-150px)] min-h-[720px] overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white dark:border-[#1a2f32] dark:bg-[#001011]">
-      <div className="flex h-full min-w-0">
-        <aside className="z-10 w-80 shrink-0 overflow-y-auto border-r border-[#e5e7eb] bg-[#FFFFFC] p-5 dark:border-[#1a2f32] dark:bg-[#001011]">
+    <div className="overflow-hidden rounded-2xl border border-[#e5e7eb] bg-white dark:border-[#1a2f32] dark:bg-[#001011] lg:h-[calc(100vh-150px)] lg:min-h-[720px]">
+      <div className="flex min-w-0 flex-col lg:h-full lg:flex-row">
+        <aside className="z-10 max-h-[52vh] w-full overflow-y-auto border-b border-[#e5e7eb] bg-[#FFFFFC] p-5 dark:border-[#1a2f32] dark:bg-[#001011] lg:max-h-none lg:w-80 lg:shrink-0 lg:border-b-0 lg:border-r">
           <label className="space-y-2">
             <span className="text-xs font-medium uppercase tracking-wider text-[#757780]">Select Route</span>
             <select
@@ -338,7 +334,7 @@ export function PathBuilderMap({ routes }: { routes: BuilderRoute[] }) {
         </aside>
 
         <section
-          className="relative min-w-0 flex-1 overflow-hidden"
+          className="relative h-[50vh] min-h-[360px] min-w-0 overflow-hidden lg:h-auto lg:flex-1"
           style={{
             cursor: mode === "addPath" ? "crosshair" : mode === "addStop" ? "cell" : "default",
           }}

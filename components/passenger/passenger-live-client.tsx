@@ -81,8 +81,8 @@ export function PassengerLiveClient() {
             setData(json);
 
             setSelectedVehicleId((current) => current ?? json.nearestVehicle?.id ?? null);
-        } catch (error) {
-            console.error(error);
+        } catch {
+            setData(null);
         } finally {
             setIsLoading(false);
         }

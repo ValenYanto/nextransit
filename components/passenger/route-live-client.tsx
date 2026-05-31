@@ -267,8 +267,8 @@ export function RouteLiveClient({
         </div>
       </section>
 
-      <div className="grid gap-4 md:h-[calc(100vh-190px)] md:grid-cols-[380px_1fr]">
-        <aside className="order-2 min-h-0 space-y-4 overflow-y-auto md:order-1">
+      <div className="grid min-w-0 gap-4 md:h-[calc(100vh-190px)] md:grid-cols-[380px_1fr]">
+        <aside className="order-2 min-h-0 min-w-0 space-y-4 overflow-y-auto md:order-1">
           {isManualLocationMode ? (
             <p className="rounded-2xl border border-[#6CCFF6]/30 bg-[#6CCFF6]/10 p-3 text-sm text-[#757780]">
               Click the map to pin your location.
@@ -352,7 +352,7 @@ export function RouteLiveClient({
                       {!isLast ? <div className="min-h-10 w-0.5 flex-1 bg-gray-200 dark:bg-white/10" /> : null}
                     </div>
 
-                    <div className={`ml-3 flex-1 ${isNearest ? "pb-3" : "pb-1"}`}>
+                    <div className={`ml-3 min-w-0 flex-1 ${isNearest ? "pb-3" : "pb-1"}`}>
                       <button
                         type="button"
                         onClick={() => setSelectedStopId(stop.id)}
@@ -433,7 +433,7 @@ export function RouteLiveClient({
           ) : null}
         </aside>
 
-        <section className="relative order-1 min-h-[45vh] md:order-2 md:min-h-0">
+        <section className="relative order-1 min-h-[45vh] min-w-0 md:order-2 md:min-h-0">
           <RouteLiveMapWrapper
             routeName={data.route.name}
             stops={data.stops}

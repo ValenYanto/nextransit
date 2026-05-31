@@ -163,7 +163,21 @@ function timeFor(sequence: number, routeIndex: number) {
 }
 
 async function main() {
-    console.log("Seeding NexTransit...");
+    console.log("🌱 Seeding NexTransit database...");
+
+    await prisma.etaPrediction.deleteMany();
+    await prisma.vehiclePosition.deleteMany();
+    await prisma.vehicleOccupancy.deleteMany();
+    await prisma.passengerTap.deleteMany();
+    await prisma.crowdPrediction.deleteMany();
+    await prisma.vehicle.deleteMany();
+    await prisma.routePathPoint.deleteMany();
+    await prisma.schedule.deleteMany();
+    await prisma.route.deleteMany();
+    await prisma.stop.deleteMany();
+    await prisma.transportMode.deleteMany();
+    await prisma.user.deleteMany();
+    console.log("🗑  Cleared existing data");
 
     const password = await bcrypt.hash("password123", 12);
 
@@ -180,6 +194,7 @@ async function main() {
             },
         });
     }
+    console.log("✅ Users created");
 
     const modeBySlug = new Map<string, { id: string }>();
     for (const mode of modes) {
@@ -199,6 +214,7 @@ async function main() {
         });
         modeBySlug.set(mode.slug, record);
     }
+    console.log("✅ Modes created");
 
     const stopByCode = new Map<string, { id: string }>();
     for (const stop of stops) {
@@ -219,6 +235,7 @@ async function main() {
         });
         stopByCode.set(stop.code, record);
     }
+    console.log("✅ Stops created");
 
     const routeByCode = new Map<string, { id: string }>();
     for (const route of routeDefinitions) {
@@ -249,6 +266,7 @@ async function main() {
         });
         routeByCode.set(route.code, record);
     }
+    console.log("✅ Routes created");
 
     await prisma.route.updateMany({
         where: {
@@ -359,6 +377,7 @@ async function main() {
             },
         });
     }
+    console.log("✅ Vehicles created");
 
     await prisma.vehicle.updateMany({
         where: {
@@ -422,7 +441,12 @@ async function main() {
         );
     }
 
-    console.log("Seed completed.");
+    console.log("🎉 Seed complete!");
+    console.log("");
+    console.log("Demo accounts:");
+    console.log("  admin@nextransit.ai    / password123  (ADMIN)");
+    console.log("  operator@nextransit.ai / password123  (OPERATOR)");
+    console.log("  user@nextransit.ai     / password123  (USER)");
 }
 
 main()

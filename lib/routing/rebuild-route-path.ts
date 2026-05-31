@@ -33,8 +33,10 @@ type RebuildOptions = {
 export async function rebuildRoutePathFromSchedules(
     prisma: PrismaClient,
     routeId: string,
-    options: RebuildOptions = {},
+    _options: RebuildOptions = {},
 ): Promise<RoutePathRebuildReport> {
+    void _options;
+
     const route = await prisma.route.findUnique({
         where: { id: routeId },
         include: {
@@ -81,21 +83,9 @@ export async function rebuildRoutePathFromSchedules(
                 source: "RAIL_MANUAL" as const,
                 error: validation.reason,
             };
-        const finalValidation = validateRouteGeometry({
-            points: finalResult.points,
-            stops: stopCoordinates,
-            maxJumpKm: route.type === "MRT" ? 2.5 : 4,
-            maxDistanceFromStopsKm: route.type === "MRT" ? 4 : 18,
-        });
         const safePoints = stripClosingDuplicate(finalResult.points);
 
         await replaceRoutePath(prisma, route.id, safePoints, finalResult.source);
-
-        if (options.log) {
-            console.log(`${route.code}: source=${finalResult.source}, points=${safePoints.length}`);
-            if (finalResult.error) console.warn(`[${route.code}] ${finalResult.error}`);
-            if (!finalValidation.valid) console.warn(`[${route.code}] final rail validation: ${finalValidation.reason}`);
-        }
 
         return {
             routeId: route.id,
@@ -138,15 +128,6 @@ export async function rebuildRoutePathFromSchedules(
             error: result.error,
         });
 
-        if (options.log) {
-            const distance = result.distanceMeters
-                ? `${(result.distanceMeters / 1000).toFixed(1)}km`
-                : "n/a";
-            console.log(
-                `[${route.code}] ${from.name} -> ${to.name}: ${result.source} ${result.points.length} pts, ${distance}`,
-            );
-        }
-
         await sleep(650);
     }
 
@@ -154,10 +135,6 @@ export async function rebuildRoutePathFromSchedules(
     const source = resolvePathSource(route.type, segmentReports);
 
     await replaceRoutePath(prisma, route.id, pathPoints, source);
-
-    if (options.log && source === "FALLBACK") {
-        console.warn(`WARNING: ${route.code} route path is fallback, not realistic road routing.`);
-    }
 
     return {
         routeId: route.id,

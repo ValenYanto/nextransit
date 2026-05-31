@@ -73,8 +73,7 @@ export function RoutePlanner({ stops }: RoutePlannerProps) {
             }
 
             setResult(data);
-        } catch (error) {
-            console.error(error);
+        } catch {
             setResult(null);
         } finally {
             setIsLoading(false);

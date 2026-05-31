@@ -109,12 +109,6 @@ export async function POST() {
                     }),
                 ]);
 
-                if (process.env.NODE_ENV === "development") {
-                    console.log(
-                        `[MOVE_VEHICLE_PATH] ${vehicle.code} moved ${currentDirection} path index ${nearestIndex} -> ${targetIndex} (${nextDirection})`,
-                    );
-                }
-
                 return {
                     vehicleId: vehicle.id,
                     code: vehicle.code,
